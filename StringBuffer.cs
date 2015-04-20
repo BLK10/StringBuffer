@@ -7260,13 +7260,19 @@ namespace BLK10.Text
 
                 if (condition != null)                   
                 {
-                    if (condition(this, index) && (trueAction != null))
+                    if (condition(this, index))
                     {
-                        trueAction(this, index);
+                        if (trueAction != null)
+                        {
+                            trueAction(this, index);
+                        }
                     }
-                    else if (falseAction != null)
+                    else
                     {
-                        trueAction(this, index);                         
+                        if (falseAction != null)
+                        {
+                            falseAction(this, index);
+                        }
                     }                    
                 }
             }
@@ -7315,7 +7321,7 @@ namespace BLK10.Text
             return (this);
         }
                        
-        /// <summary>.</summary>
+        /// <summary>Please don't use it, a simple for loop could do the job, it's abused.</summary>
         public StringBuffer For(Func<StringBuffer, int>       declaration,
                                 Func<StringBuffer, int, bool> condition,
                                 Func<StringBuffer, int>       assignation,

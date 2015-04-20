@@ -87,7 +87,7 @@ The two methods to check the status of a 'Replace ...' / 'Substring ...' operati
 
 'Unfail()' method resets the state of the last operation.
 
-Whenever you make a 'Replace ...' / Substring ... ' method call its state is reset, except if it happens in a fluent method where it's state is restored after the execution of the lambda expression.
+Whenever you make a 'Replace ...' / Substring ... ' method call its state is reset, except for the 'Fail()' / 'Succeed()' method where it's state is restored after the execution of the lambda expression.
 
     - Fail
     - Succeed

@@ -89,7 +89,7 @@ Les deux méthodes pour contrôler l'état d'une opération 'Replace...' / 'Subs
 
 La méthode 'Unfail()' réinitialise l'état de la dernière opération.
 
-A chaque fois que vous faite appel à une méthode 'Replace...' / Substring...' son état est réinitialisé, à part si cela ce passe dans une méthode fluide, ou son état est restitué après l’exécution de l'expression lambda.
+A chaque fois que vous faite appel à une méthode 'Replace...' / Substring...' son état est réinitialisé, mis à part pour les methodes 'Fail()' / 'Succeed()', ou son état est restitué après l’exécution de l'expression lambda.
 
     - Fail
     - Succeed

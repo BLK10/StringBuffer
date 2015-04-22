@@ -2821,8 +2821,8 @@ namespace BLK10.Text
             }
                         
             if (pos != -1)
-            {
-                this.InternalAssign(index, newValue);
+            {                
+                this.InternalReplace(newValue, pos, 1);
             }
             else
             {
@@ -7203,7 +7203,7 @@ namespace BLK10.Text
 
             return (this);
         }
-        
+                
         /// <summary>.</summary>        
         public StringBuffer While(Func<StringBuffer, bool> condition)
         {
@@ -7303,51 +7303,24 @@ namespace BLK10.Text
 
             return (this);
         }
-        
+                
         /// <summary>.</summary>
         public StringBuffer DoWhile(Func<StringBuffer, bool> condition, Action<StringBuffer> action)
-        {
+        {            
             if (condition != null)
-            {
+            {               
                 while (condition(this))
                 {
                     if (action != null)
                     {
                         action(this);
                     }
-                }
+                }                
             }
 
             return (this);
         }
-                       
-        /// <summary>Please don't use it, a simple for loop could do the job, it's abused.</summary>
-        public StringBuffer For(Func<StringBuffer, int>       declaration,
-                                Func<StringBuffer, int, bool> condition,
-                                Func<StringBuffer, int>       assignation,
-                                Action<StringBuffer, int>     action)
-        {
-            if ((declaration != null) && (condition != null))
-            {
-                int index = declaration(this);
-                
-                if (action != null)
-                {
-                    while (condition(this, index))
-                    {
-                        action(this, index);
-                        if (assignation != null)
-                        {
-                            index += assignation(this);
-                        }
-                    }
-                }
-
-            }
-
-            return (this);
-        }
-
+        
         #endregion
 
 
@@ -11891,7 +11864,7 @@ namespace BLK10.Text
             var chunk = this.FindChunkForIndex(index);
             int localIndex = index - chunk.m_Offset;
 
-            chunk.m_Chars[localIndex] = value;
+            chunk.m_Chars[localIndex] = value;            
 
             this.m_CachedStr = null;
         }

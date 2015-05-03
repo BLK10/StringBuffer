@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 
 // TODO: Documentation, CTOR for Stream
@@ -12,6 +13,7 @@ namespace BLK10.Text
         LastOccurrence
     }
 
+    
     public class StringBuffer : IEnumerator, IEnumerable, IComparable, IComparable<StringBuffer>, IEquatable<StringBuffer>
     {
         // To keep the chunk arrays out of the large object heap set the MAX_CHUNK_SIZE lesser than 40K chars(85 K-bytes) .
@@ -20,7 +22,7 @@ namespace BLK10.Text
         private const int DEFAULT_CAPACITY = 32;
         
         // Whitespaces category, see url: msdn.microsoft.com/en-us/library/system.char.iswhitespace.aspx
-        internal static readonly char[] Whitespaces = new char[25]
+        internal static readonly char[] Whitespace = new char[25]
         {
             // SpaceSeparator category
             '\u0020', // SPACE
@@ -55,12 +57,14 @@ namespace BLK10.Text
             '\u0085', // NEXT LINE
             '\u00A0'  // NO-BREAK SPACE
         };
+
+        internal static readonly char[] Crlf = new char[] { '\r', '\n' };
         
         public readonly int m_MaxCapacity;
         private StringNode  m_ChunkHead;
         private StringNode  m_ChunkTail;
         private string      m_CachedStr;
-        private int         m_Position;
+        private int         m_Position;        
         private bool        m_Failed;
 
         private enum FormatState
@@ -212,7 +216,8 @@ namespace BLK10.Text
             this.m_CachedStr   = null;
             this.m_ChunkHead   = StringNode.CreateInstance(0, 0, capacity, null);
             this.m_ChunkTail   = this.m_ChunkHead;
-            this.m_Position    = -1;
+            this.m_Position    = -1;            
+            this.m_Failed      = false;
 
             this.InternalAppend(chars, startIndex, length);
         }
@@ -299,19 +304,24 @@ namespace BLK10.Text
             {
                 if ((index < 0) || (index >= this.Length))
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new IndexOutOfRangeException("index");
                 }
 
                 var chunk = this.FindChunkForIndex(index);
-                int localIndex = index - chunk.m_Offset;
+                int local = index - chunk.m_Offset;
 
-                return (chunk.m_Chars[localIndex]);
+                if (local >= chunk.m_Length)
+                {
+                    throw new ApplicationException("local index out of range");
+                }
+
+                return (chunk.m_Chars[local]);
             }
             set
             {
                 if ((index < 0) || (index >= this.Length))
                 {
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new IndexOutOfRangeException("index");
                 }
 
                 this.CheckEnumeration();
@@ -320,6 +330,44 @@ namespace BLK10.Text
             }
         }
 
+        /// <summary>Gets a string at the specified character position with the specified length in this instance.</summary>    
+        public string this[int index, int length]
+        {
+            get
+            {
+                if ((index < 0) || (index >= this.Length))
+                {
+                    throw new IndexOutOfRangeException("index");
+                }
+
+                if ((length < 0) || ((index + length) > this.Length))
+                {
+                    throw new IndexOutOfRangeException("length");
+                }
+
+                if (this.m_CachedStr != null)
+                {
+                    return (this.m_CachedStr.Substring(index, length));
+                }
+
+                char[] result = new char[this.Length];
+                var    chunk  = this.m_ChunkHead;
+
+                int i = 0;
+                while (chunk != null)
+                {
+                    int len = Math.Min(chunk.m_Chars.Length, chunk.m_Length);
+                    Array.Copy(chunk.m_Chars, 0, result, i, len);
+                    i += len;
+                    chunk = chunk.m_Next;
+                }
+
+                this.m_CachedStr = new string(result);
+
+                return (this.m_CachedStr.Substring(index, length));
+            }            
+        }
+        
         /// <summary>Gets the state of the previous Replace or Substring methods call.</summary>
         public bool Failed
         {
@@ -331,7 +379,7 @@ namespace BLK10.Text
         {
             get { return ((this.m_ChunkTail.m_Offset + this.m_ChunkTail.m_Length) == 0); }
         }
-
+        
         #endregion
 
 
@@ -354,7 +402,7 @@ namespace BLK10.Text
         #endregion
 
 
-        #region "APPEND | APPENDLINE | APPENDFORMAT | APPENDFORMATLINE"
+        #region "APPEND | APPENDLINE | APPENDFORMAT | APPENDLINEFORMAT"
 
         /// <summary>Appends a specified character to this instance.</summary>
         public StringBuffer Append(char value)
@@ -606,12 +654,11 @@ namespace BLK10.Text
             this.CheckEnumeration();
             this.m_Failed = false;
 
-            if (length == 0)
+            if (length != 0)
             {
-                return (this);
+                this.InternalAppend(value, startIndex, length);
             }
-
-            this.InternalAppend(value, startIndex, length);
+            
             this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
             return (this);
         }
@@ -660,12 +707,11 @@ namespace BLK10.Text
             this.CheckEnumeration();
             this.m_Failed = false;
 
-            if (length == 0)
+            if (length != 0)
             {
-                return (this);
+                this.InternalAppend(value, startIndex, length);
             }
-
-            this.InternalAppend(value, startIndex, length);
+            
             this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
             return (this);
         }
@@ -714,12 +760,11 @@ namespace BLK10.Text
             this.CheckEnumeration();
             this.m_Failed = false;
 
-            if (length == 0)
+            if (length != 0)
             {
-                return (this);
+                this.InternalAppend(value, startIndex, length);
             }
-
-            this.InternalAppend(value, startIndex, length);
+                        
             this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
             return (this);
         }
@@ -740,9 +785,9 @@ namespace BLK10.Text
             }
 
             this.CheckEnumeration();
-                        
+            int index = this.Length;
             this.InternalAppend(value, 0, value.Length);
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, index, value.Length);
             
             return (this);
         }
@@ -762,9 +807,9 @@ namespace BLK10.Text
             }
 
             this.CheckEnumeration();
-                        
+            int index = this.Length;            
             this.InternalAppend(value, 0, value.Length);
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, index, value.Length);
 
             return (this);
         }
@@ -784,9 +829,9 @@ namespace BLK10.Text
             }
 
             this.CheckEnumeration();
-                        
+            int index = this.Length;            
             this.InternalAppend(value, 0, value.Length);
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, index, value.Length);
 
             return (this);
         }
@@ -807,9 +852,9 @@ namespace BLK10.Text
 
             this.CheckEnumeration();
             this.m_Failed = false;
-                        
-            this.InternalAppend(value, 0, value.Length);                        
-            this.InternalFormat(args, provider);
+            int index = this.Length;            
+            this.InternalAppend(value, 0, value.Length);
+            this.InternalFormat(args, provider, index, value.Length);
 
             return (this);
         }
@@ -817,7 +862,31 @@ namespace BLK10.Text
 
         /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer AppendFormatLine(string value, params object[] args)
+        public StringBuffer AppendLineFormat(string value, params object[] args)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentNullException("value");
+            }
+
+            if (args == null)
+            {
+                throw new ArgumentNullException("args");
+            }
+
+            this.CheckEnumeration();
+            this.m_Failed = false;            
+            int index = this.Length;
+            this.InternalAppend(value, 0, value.Length);
+            this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
+            this.InternalFormat(args, null, index, value.Length);
+
+            return (this);
+        }
+
+        /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
+        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
+        public StringBuffer AppendLineFormat(string value, IFormatProvider provider, params object[] args)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -831,41 +900,17 @@ namespace BLK10.Text
 
             this.CheckEnumeration();
             this.m_Failed = false;
-
+            int index = this.Length;
             this.InternalAppend(value, 0, value.Length);
             this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            this.InternalFormat(args, null);
-
-            return (this);
-        }
-
-        /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer AppendFormatLine(string value, IFormatProvider provider, params object[] args)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            this.InternalAppend(value, 0, value.Length);
-            this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, index, value.Length);
 
             return (this);
         }
 
         /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer AppendFormatLine(StringBuffer value, params object[] args)
+        public StringBuffer AppendLineFormat(StringBuffer value, params object[] args)
         {
             if (StringBuffer.IsNullOrEmpty(value))
             {
@@ -879,17 +924,17 @@ namespace BLK10.Text
 
             this.CheckEnumeration();
             this.m_Failed = false;
-
+            int index = this.Length;
             this.InternalAppend(value, 0, value.Length);
             this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, index, value.Length);
 
             return (this);
         }
 
         /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer AppendFormatLine(StringBuffer value, IFormatProvider provider, params object[] args)
+        public StringBuffer AppendLineFormat(StringBuffer value, IFormatProvider provider, params object[] args)
         {
             if (StringBuffer.IsNullOrEmpty(value))
             {
@@ -903,18 +948,18 @@ namespace BLK10.Text
 
             this.CheckEnumeration();
             this.m_Failed = false;
-
+            int index = this.Length;
             this.InternalAppend(value, 0, value.Length);
             this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, index, value.Length);
 
             return (this);
         }
         
         #endregion
-        
 
-        #region "PREPEND | PREPENDLINE | PREPENDFORMAT | PREPENDFORMATLINE"
+
+        #region "PREPEND | PREPENDLINE | PREPENDFORMAT | PREPENDLINEFORMAT"
 
         /// <summary>Prepends a specified character to this instance.</summary>
         public StringBuffer Prepend(char value)
@@ -1221,21 +1266,23 @@ namespace BLK10.Text
 
             this.CheckEnumeration();
             this.m_Failed = false;
-
-            if (length == 0)
-            {
-                return (this);
-            }
-
+                        
             if (this.Length == 0)
             {
-                this.InternalAppend(value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAppend(value, startIndex, length);
+                }
+
                 this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
             }
             else
             {
                 this.InternalExpand(0, length + Environment.NewLine.Length);
-                this.InternalAssign(0, value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAssign(0, value, startIndex, length);
+                }
                 this.InternalAssign(length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
             
@@ -1290,21 +1337,22 @@ namespace BLK10.Text
             
             this.CheckEnumeration();
             this.m_Failed = false;
-
-            if (length == 0)
-            {
-                return (this);
-            }
-
+  
             if (this.Length == 0)
             {
-                this.InternalAppend(value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAppend(value, startIndex, length);
+                }
                 this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
             }
             else
             {
                 this.InternalExpand(0, length + Environment.NewLine.Length);
-                this.InternalAssign(0, value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAssign(0, value, startIndex, length);
+                }
                 this.InternalAssign(length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
@@ -1367,13 +1415,19 @@ namespace BLK10.Text
 
             if (this.Length == 0)
             {
-                this.InternalAppend(value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAppend(value, startIndex, length);
+                }
                 this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
             }
             else
             {
                 this.InternalExpand(0, length + Environment.NewLine.Length);
-                this.InternalAssign(0, value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAssign(0, value, startIndex, length);
+                }
                 this.InternalAssign(length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
@@ -1408,7 +1462,7 @@ namespace BLK10.Text
                 this.InternalAssign(0, value, 0, value.Length);
             }
 
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, 0, value.Length);
 
             return (this);
         }
@@ -1440,7 +1494,7 @@ namespace BLK10.Text
                 this.InternalAssign(0, value, 0, value.Length);
             }
 
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, 0, value.Length);
 
             return (this);
         }
@@ -1472,7 +1526,7 @@ namespace BLK10.Text
                 this.InternalAssign(0, value, 0, value.Length);
             }
 
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, 0, value.Length);
 
             return (this);
         }
@@ -1504,7 +1558,7 @@ namespace BLK10.Text
                 this.InternalAssign(0, value, 0, value.Length);
             }
 
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, 0, value.Length);
 
             return (this);
         }
@@ -1512,7 +1566,7 @@ namespace BLK10.Text
 
         /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer PrependFormatLine(string value, params object[] args)
+        public StringBuffer PrependLineFormat(string value, params object[] args)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -1539,14 +1593,14 @@ namespace BLK10.Text
                 this.InternalAssign(value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, 0, value.Length);
 
             return (this);
         }
 
         /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer PrependFormatLine(string value, IFormatProvider provider, params object[] args)
+        public StringBuffer PrependLineFormat(string value, IFormatProvider provider, params object[] args)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -1573,14 +1627,14 @@ namespace BLK10.Text
                 this.InternalAssign(value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, 0, value.Length);
 
             return (this);
         }
 
         /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer PrependFormatLine(StringBuffer value, params object[] args)
+        public StringBuffer PrependLineFormat(StringBuffer value, params object[] args)
         {
             if (StringBuffer.IsNullOrEmpty(value))
             {
@@ -1607,14 +1661,14 @@ namespace BLK10.Text
                 this.InternalAssign(value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, 0, value.Length);
 
             return (this);
         }
 
         /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer PrependFormatLine(StringBuffer value, IFormatProvider provider, params object[] args)
+        public StringBuffer PrependLineFormat(StringBuffer value, IFormatProvider provider, params object[] args)
         {
             if (StringBuffer.IsNullOrEmpty(value))
             {
@@ -1641,15 +1695,15 @@ namespace BLK10.Text
                 this.InternalAssign(value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, 0, value.Length);
 
             return (this);
         }
         
         #endregion
-                
 
-        #region "INSERT | INSERTLINE | INSERTFORMAT | INSERTFORMATLINE"
+
+        #region "INSERT | INSERTLINE | INSERTFORMAT | INSERTLINEFORMAT"
 
         /// <summary>Inserts a specified character into this instance at the specified character position.</summary>
         public StringBuffer Insert(int index, char value)
@@ -1977,21 +2031,22 @@ namespace BLK10.Text
 
             this.CheckEnumeration();
             this.m_Failed = false;
-
-            if (length == 0)
-            {
-                return (this);
-            }
-
+            
             if (index == this.Length)
             {
-                this.InternalAppend(value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAppend(value, startIndex, length);
+                }
                 this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);                
             }
             else
             {
                 this.InternalExpand(index, length + Environment.NewLine.Length);
-                this.InternalAssign(index, value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAssign(index, value, startIndex, length);
+                }
                 this.InternalAssign(index + length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
@@ -2046,21 +2101,22 @@ namespace BLK10.Text
 
             this.CheckEnumeration();
             this.m_Failed = false;
-
-            if (length == 0)
-            {
-                return (this);
-            }
-
+                        
             if (index == this.Length)
             {
-                this.InternalAppend(value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAppend(value, startIndex, length);
+                }
                 this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
             }
             else
             {                
                 this.InternalExpand(index, length + Environment.NewLine.Length);
-                this.InternalAssign(index, value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAssign(index, value, startIndex, length);
+                }
                 this.InternalAssign(index + length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
@@ -2115,21 +2171,22 @@ namespace BLK10.Text
 
             this.CheckEnumeration();
             this.m_Failed = false;
-
-            if (length == 0)
-            {
-                return (this);
-            }
-            
+                        
             if (index == this.Length)
             {
-                this.InternalAppend(value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAppend(value, startIndex, length);
+                }
                 this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
             }
             else
             {                
                 this.InternalExpand(index, length + Environment.NewLine.Length);
-                this.InternalAssign(index, value, startIndex, length);
+                if (length != 0)
+                {
+                    this.InternalAssign(index, value, startIndex, length);
+                }
                 this.InternalAssign(index + length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
@@ -2169,7 +2226,7 @@ namespace BLK10.Text
                 this.InternalAssign(index, value, 0, value.Length);
             }
 
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, 0, value.Length);
 
             return (this);
         }
@@ -2206,7 +2263,7 @@ namespace BLK10.Text
                 this.InternalAssign(index, value, 0, value.Length);
             }
 
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, index, value.Length);
 
             return (this);
         }
@@ -2243,7 +2300,7 @@ namespace BLK10.Text
                 this.InternalAssign(index, value, 0, value.Length);
             }
 
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, index, value.Length);
 
             return (this);
         }
@@ -2280,7 +2337,7 @@ namespace BLK10.Text
                 this.InternalAssign(index, value, 0, value.Length);
             }
 
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, index, value.Length);
 
             return (this);
         }
@@ -2288,7 +2345,7 @@ namespace BLK10.Text
 
         /// <summary>Inserts the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer InsertFormatLine(int index, string value, params object[] args)
+        public StringBuffer InsertLineFormat(int index, string value, params object[] args)
         {
             if ((index < 0) || (index > this.Length))
             {
@@ -2320,14 +2377,14 @@ namespace BLK10.Text
                 this.InternalAssign(index + value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, index, value.Length);
 
             return (this);
         }
 
         /// <summary>Inserts the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer InsertFormatLine(int index, string value, IFormatProvider provider, params object[] args)
+        public StringBuffer InsertLineFormat(int index, string value, IFormatProvider provider, params object[] args)
         {
             if ((index < 0) || (index > this.Length))
             {
@@ -2359,14 +2416,14 @@ namespace BLK10.Text
                 this.InternalAssign(index + value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, index, value.Length);
 
             return (this);
         }
 
         /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer InsertFormatLine(int index, StringBuffer value, params object[] args)
+        public StringBuffer InsertLineFormat(int index, StringBuffer value, params object[] args)
         {
             if ((index < 0) || (index > this.Length))
             {
@@ -2398,14 +2455,14 @@ namespace BLK10.Text
                 this.InternalAssign(index + value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
-            this.InternalFormat(args, null);
+            this.InternalFormat(args, null, index, value.Length);
 
             return (this);
         }
 
         /// <summary>Inserts the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer InsertFormatLine(int index, StringBuffer value, IFormatProvider provider, params object[] args)
+        public StringBuffer InsertLineFormat(int index, StringBuffer value, IFormatProvider provider, params object[] args)
         {
             if ((index < 0) || (index > this.Length))
             {
@@ -2437,7 +2494,7 @@ namespace BLK10.Text
                 this.InternalAssign(index + value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
             }
 
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, index, value.Length);
 
             return (this);
         }
@@ -6673,7 +6730,7 @@ namespace BLK10.Text
         /// <summary>Removes all leading and trailing white-space characters from this instance.</summary>    
         public StringBuffer Trim()
         {
-            return (this.Trim(Whitespaces, false));
+            return (this.Trim(StringBuffer.Whitespace, false));
         }
         
         /// <summary>Removes all leading and trailing occurrences of a specified character from this instance.</summary>
@@ -6696,12 +6753,12 @@ namespace BLK10.Text
 
             if (value == null)
             {
-                value = Whitespaces;
+                value = StringBuffer.Whitespace;
             }
 
             if (value.Length == 0)
             {
-                value = Whitespaces;
+                value = StringBuffer.Whitespace;
             }
 
             this.InternalTrim(value, ignoreCase, true, true);
@@ -6713,7 +6770,7 @@ namespace BLK10.Text
         /// <summary>Removes all leading white-space characters from this instance.</summary>
         public StringBuffer TrimStart()
         {
-            return (this.TrimStart(Whitespaces, false));
+            return (this.TrimStart(StringBuffer.Whitespace, false));
         }
                 
         /// <summary>Removes all leading occurrences of a specified character from this instance.</summary>
@@ -6736,12 +6793,12 @@ namespace BLK10.Text
 
             if (value == null)
             {
-                value = Whitespaces;
+                value = StringBuffer.Whitespace;
             }
 
             if (value.Length == 0)
             {
-                value = Whitespaces;
+                value = StringBuffer.Whitespace;
             }
 
             this.InternalTrim(value, ignoreCase, true, false);
@@ -6753,7 +6810,7 @@ namespace BLK10.Text
         /// <summary>Removes all trailing white-space characters from this instance.</summary>
         public StringBuffer TrimEnd()
         {
-            return (this.TrimEnd(Whitespaces, false));
+            return (this.TrimEnd(StringBuffer.Whitespace, false));
         }
 
         /// <summary>Removes all trailing occurrences of a specified character from this instance.</summary>
@@ -6776,12 +6833,12 @@ namespace BLK10.Text
 
             if (value == null)
             {
-                value = Whitespaces;
+                value = StringBuffer.Whitespace;
             }
 
             if (value.Length == 0)
             {
-                value = Whitespaces;
+                value = StringBuffer.Whitespace;
             }
 
             this.InternalTrim(value, ignoreCase, false, true);
@@ -7122,11 +7179,30 @@ namespace BLK10.Text
 
 
         #region "FORMATWITH"
+
         /// <summary>Format with the specified objects, there is two type of format:
         /// <para/>based on index position equivalent to the string format or based on name.        
         /// </summary>
         public StringBuffer FormatWith(IFormatProvider provider, params object[] args)
         {
+            return (this.FormatWith(0, this.Length, provider, args));
+        }
+
+        /// <summary>Format with the specified objects, there is two type of format:
+        /// <para/>based on index position equivalent to the string format or based on name.        
+        /// </summary>
+        public StringBuffer FormatWith(int index, int length, IFormatProvider provider, params object[] args)
+        {            
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException("length");
+            }
+
+            if ((index < 0) || ((index + length) > this.Length))
+            {
+                throw new ArgumentOutOfRangeException("startIndex");
+            }
+
             if (args == null)
             {
                 throw new ArgumentNullException("args");
@@ -7140,7 +7216,7 @@ namespace BLK10.Text
                 return (this);
             }
 
-            this.InternalFormat(args, provider);
+            this.InternalFormat(args, provider, index, length);
 
             return (this);
         }
@@ -8320,7 +8396,7 @@ namespace BLK10.Text
 
                     if (ignoreWhitespace)
                     {
-                        if (str.IndexOfAny(Whitespaces) != -1)
+                        if (str.IndexOfAny(StringBuffer.Whitespace) != -1)
                         {
                             throw new ApplicationException("You couldn't ignore whitespace and check if this instance contains a string with a whitespace.");
                         }
@@ -8435,7 +8511,7 @@ namespace BLK10.Text
 
                     if (ignoreWhitespace)
                     {
-                        if (str.IndexOfAny(Whitespaces) != -1)
+                        if (str.IndexOfAny(StringBuffer.Whitespace) != -1)
                         {
                             throw new ApplicationException("You couldn't ignore whitespace and check if this instance contains a string buffer with a whitespace.");
                         }
@@ -8957,7 +9033,7 @@ namespace BLK10.Text
 
             if (ignoreWhitespace)
             {
-                if (value.IndexOfAny(Whitespaces) != -1)                
+                if (value.IndexOfAny(StringBuffer.Whitespace) != -1)                
                 {
                     throw new ApplicationException("You couldn't ignore whitespace and check if this instance starts with a string containing a whitespace.");
                 }
@@ -9014,8 +9090,8 @@ namespace BLK10.Text
             int idx = 0;
 
             if (ignoreWhitespace)
-            {                
-                if (value.ContainsAny(Whitespaces))
+            {
+                if (value.ContainsAny(StringBuffer.Whitespace))
                 {
                     throw new ApplicationException("You couldn't ignore whitespace and check if this instance starts with a string buffer containing a whitespace.");
                 }
@@ -9162,7 +9238,7 @@ namespace BLK10.Text
                              
                 if (ignoreWhitespace)
                 {
-                    if (str.IndexOfAny(Whitespaces) != -1)  
+                    if (str.IndexOfAny(StringBuffer.Whitespace) != -1)  
                     {
                         throw new ApplicationException("You couldn't ignore whitespace and check if this instance starts with a string containing a whitespace.");
                     }
@@ -9242,7 +9318,7 @@ namespace BLK10.Text
 
                 if (ignoreWhitespace)
                 {
-                    if (str.IndexOfAny(Whitespaces) != -1)
+                    if (str.IndexOfAny(StringBuffer.Whitespace) != -1)
                     {
                         throw new ApplicationException("You couldn't ignore whitespace and check if this instance starts with a string buffer containing a whitespace.");
                     }
@@ -9393,7 +9469,7 @@ namespace BLK10.Text
                     continue;
                 }
 
-                if (ignoreWhitespace && (str.IndexOfAny(Whitespaces) != -1))
+                if (ignoreWhitespace && (str.IndexOfAny(StringBuffer.Whitespace) != -1))
                 {
                     throw new ApplicationException("You couldn't ignore whitespace and check if this instance starts with a string containing a whitespace.");
                 }
@@ -9466,7 +9542,7 @@ namespace BLK10.Text
                     continue;
                 }
 
-                if (ignoreWhitespace && (str.IndexOfAny(Whitespaces) != -1))
+                if (ignoreWhitespace && (str.IndexOfAny(StringBuffer.Whitespace) != -1))
                 {
                     throw new ApplicationException("You couldn't ignore whitespace and check if this instance starts with a string buffer containing a whitespace.");
                 }
@@ -9562,7 +9638,7 @@ namespace BLK10.Text
 
             if (ignoreWhitespace)
             {
-                if (value.IndexOfAny(Whitespaces) != -1)
+                if (value.IndexOfAny(StringBuffer.Whitespace) != -1)
                 {
                     throw new ApplicationException("You couldn't ignore whitespace and check if this instance ends with a string containing a whitespace.");
                 }
@@ -9620,7 +9696,7 @@ namespace BLK10.Text
 
             if (ignoreWhitespace)
             {
-                if (value.ContainsAny(Whitespaces))
+                if (value.ContainsAny(StringBuffer.Whitespace))
                 {
                     throw new ApplicationException("You couldn't ignore whitespace and check if this instance ends with a string buffer containing a whitespace.");
                 }
@@ -9767,7 +9843,7 @@ namespace BLK10.Text
 
                 if (ignoreWhitespace)
                 {
-                    if (str.IndexOfAny(Whitespaces) != -1)
+                    if (str.IndexOfAny(StringBuffer.Whitespace) != -1)
                     {
                         throw new ApplicationException("You couldn't ignore whitespace and check if this instance end with a string containing a whitespace.");
                     }
@@ -9847,7 +9923,7 @@ namespace BLK10.Text
 
                 if (ignoreWhitespace)
                 {
-                    if (str.IndexOfAny(Whitespaces) != -1)
+                    if (str.IndexOfAny(StringBuffer.Whitespace) != -1)
                     {
                         throw new ApplicationException("You couldn't ignore whitespace and check if this instance end with a string buffer containing a whitespace.");
                     }
@@ -9997,8 +10073,8 @@ namespace BLK10.Text
                 {
                     continue;
                 }
-                
-                if (ignoreWhitespace && (str.IndexOfAny(Whitespaces) != -1))
+
+                if (ignoreWhitespace && (str.IndexOfAny(StringBuffer.Whitespace) != -1))
                 {
                     throw new ApplicationException("You couldn't ignore whitespace and check if this instance ends with a string containing a whitespace.");
                 }
@@ -10071,7 +10147,7 @@ namespace BLK10.Text
                     continue;
                 }
 
-                if (ignoreWhitespace && (str.IndexOfAny(Whitespaces) != -1))
+                if (ignoreWhitespace && (str.IndexOfAny(StringBuffer.Whitespace) != -1))
                 {
                     throw new ApplicationException("You couldn't ignore whitespace and check if this instance ends with a string buffer containing a whitespace.");
                 }
@@ -10128,11 +10204,11 @@ namespace BLK10.Text
         {
             if (delimiter == null)
             {
-                delimiter = StringBuffer.Whitespaces;
+                delimiter = StringBuffer.Whitespace;
             }
             else if (delimiter.Length == 0)
             {
-                delimiter = StringBuffer.Whitespaces;
+                delimiter = StringBuffer.Whitespace;
             }
 
             if (maxString < 0)
@@ -10195,11 +10271,11 @@ namespace BLK10.Text
         {
             if (delimiter == null)
             {
-                return (this.Split(StringBuffer.Whitespaces, maxString, options));
+                return (this.Split(StringBuffer.Whitespace, maxString, options));
             }
             else if (delimiter.Length == 0)
             {
-                return (this.Split(StringBuffer.Whitespaces, maxString, options));
+                return (this.Split(StringBuffer.Whitespace, maxString, options));
             }            
 
             if (maxString < 0)
@@ -10272,11 +10348,11 @@ namespace BLK10.Text
         {
             if (delimiter == null)
             {
-                delimiter = Whitespaces;
+                delimiter = StringBuffer.Whitespace;
             }
             else if (delimiter.Length == 0)
             {
-                delimiter = Whitespaces;
+                delimiter = StringBuffer.Whitespace;
             }
 
             if ((maxString < 0) || (maxString > int.MaxValue))
@@ -10339,11 +10415,11 @@ namespace BLK10.Text
         {
             if (delimiter == null)
             {
-                return (this.SplitToBuffer(Whitespaces, maxString, options));
+                return (this.SplitToBuffer(StringBuffer.Whitespace, maxString, options));
             }
             else if (delimiter.Length == 0)
             {
-                return (this.SplitToBuffer(Whitespaces, maxString, options));
+                return (this.SplitToBuffer(StringBuffer.Whitespace, maxString, options));
             }
 
             if ((maxString < 0) || (maxString > int.MaxValue))
@@ -10547,7 +10623,7 @@ namespace BLK10.Text
         {
             return ((IEnumerator)this);
         }
-                
+
         public bool MoveNext()
         {
             this.m_Position++;
@@ -10560,7 +10636,7 @@ namespace BLK10.Text
             this.m_Position = -1;
             return (false);
         }
-
+        
         public void Reset()
         {
             this.m_Position = -1;
@@ -10572,7 +10648,7 @@ namespace BLK10.Text
             {
                 try
                 {
-                    return (this[this.m_Position]);
+                    return (this[this.m_Position]);                    
                 }
                 catch (IndexOutOfRangeException)
                 {
@@ -10581,6 +10657,45 @@ namespace BLK10.Text
             }
         }
 
+        public IEnumerable<string> EnumerateLine()
+        {
+            int index  = 0;
+            int length = this.Length;
+
+            this.m_Position = 0;
+
+            while (index < length)
+            {
+                int endIndex = this.IndexOfAny(StringBuffer.Crlf, index);
+
+                if (endIndex != -1)
+                {
+                    int len = endIndex + 1;
+                    char ch = this[endIndex];
+
+                    if (len < length)
+                    {
+                        if (((ch == '\r') && (this[len] == '\n')) ||
+                            ((ch == '\n') && (this[len] == '\r')))
+                        {
+                            len++;
+                        }
+                    }
+
+                    len   -= index;                    
+                    yield return (this[index, (endIndex - index)]);
+                    index += len;
+                }
+                else
+                {
+                    yield return (this[index, length - index]);
+                    index = length;
+                }
+            }
+
+            this.m_Position = -1;
+        }
+        
         #endregion
 
 
@@ -10598,7 +10713,7 @@ namespace BLK10.Text
                 throw new ArgumentException();
             }
 
-            return (string.Compare(this.ToString(), ((StringBuffer)value).ToString()));
+            return (StringBuffer.Compare(this, ((StringBuffer)value).ToString()));
         }
 
         public int CompareTo(StringBuffer other)
@@ -10608,7 +10723,7 @@ namespace BLK10.Text
                 return (1);
             }
 
-            return (string.Compare(this.ToString(), other.ToString()));
+            return (StringBuffer.Compare(this, other));
         }
 
         public int CompareTo(string other)
@@ -10618,7 +10733,7 @@ namespace BLK10.Text
                 return (1);
             }
 
-            return (string.Compare(this.ToString(), other));
+            return (StringBuffer.Compare(this, other));
         }
         
 
@@ -10629,7 +10744,7 @@ namespace BLK10.Text
                 return (false);
             }
 
-            return (this.ToString().Equals(other.ToString()));
+            return (StringBuffer.Equals(this, other));            
         }
 
         public bool Equals(StringBuffer other, StringComparison comparisonType)
@@ -10639,7 +10754,7 @@ namespace BLK10.Text
                 return (false);
             }
 
-            return (string.Compare(this.ToString(), other.ToString(), comparisonType) == 0);
+            return (StringBuffer.Compare(this, other, comparisonType) == 0);            
         }
 
         public bool Equals(string other)
@@ -10648,8 +10763,8 @@ namespace BLK10.Text
             {
                 return (false);
             }
-                        
-            return (this.ToString() == other);
+            
+            return (StringBuffer.Compare(this, other) == 0);  
         }
 
         public bool Equals(string other, StringComparison comparisonType)
@@ -10659,7 +10774,7 @@ namespace BLK10.Text
                 return (false);
             }
 
-            return (string.Compare(this.ToString(), other, comparisonType) == 0);
+            return (StringBuffer.Compare(this, other, comparisonType) == 0);            
         }
         
 
@@ -10819,24 +10934,23 @@ namespace BLK10.Text
         private bool InternalContains(char value, int index, bool ignoreCase)
         {
             var chunk = this.FindChunkForIndex(index);
+            int local = index - chunk.m_Offset;
 
-            if (chunk == null)
+            if (local >= chunk.m_Length)
             {
                 return (false);
             }
 
-            int localIndex = index - chunk.m_Offset;
-
             if (ignoreCase)
             {
-                if (char.ToLower(value) == char.ToLower(chunk.m_Chars[localIndex]))                
+                if (char.ToLower(value) == char.ToLower(chunk.m_Chars[local]))                
                 {
                     return (true);
                 }
             }
             else
             {
-                if (value == chunk.m_Chars[localIndex])
+                if (value == chunk.m_Chars[local])
                 {
                     return (true);
                 }
@@ -10848,15 +10962,15 @@ namespace BLK10.Text
         private bool InternalContains(string value, int index, int count, bool ignoreCase)
         {
             var chunk = this.FindChunkForIndex(index);
-            
-            if (chunk == null)
-            {
-                return (false);
-            }
-            
+                        
             for (int i = 0, j = index - chunk.m_Offset; i < value.Length; i++)
             {
-                if ((count == 0) || (chunk == null))
+                if (chunk == null)
+                {
+                    return (false);
+                }
+
+                if ((count == 0) || (j >= chunk.m_Length))
                 {
                     return (false);
                 }
@@ -10892,15 +11006,15 @@ namespace BLK10.Text
         private bool InternalContains(StringBuffer value, int index, int count, bool ignoreCase)
         {
             var chunk = this.FindChunkForIndex(index);
-
-            if (chunk == null)
-            {
-                return (false);
-            }
-
+            
             for (int i = 0, j = index - chunk.m_Offset; i < value.Length; i++)
             {
-                if ((count == 0) || (chunk == null))
+                if (chunk == null)
+                {
+                    return (false);
+                }
+
+                if ((count == 0) || (j >= chunk.m_Length))
                 {
                     return (false);
                 }
@@ -10937,17 +11051,18 @@ namespace BLK10.Text
         private bool ContainsAnyWhitespace(int index)
         {
             var chunk = this.FindChunkForIndex(index);
+            int local = index - chunk.m_Offset;
 
-            if (chunk == null)
+            if (local >= chunk.m_Length)
             {
                 return (false);
             }
-                        
-            char c = chunk.m_Chars[(index - chunk.m_Offset)];
-            
-            for (int i = 0; i < Whitespaces.Length; i++)
+
+            char c = chunk.m_Chars[local];
+
+            for (int i = 0; i < StringBuffer.Whitespace.Length; i++)
             {
-                if (Whitespaces[i] == c)
+                if (StringBuffer.Whitespace[i] == c)
                 {
                     return (true);
                 }
@@ -10995,8 +11110,8 @@ namespace BLK10.Text
                 this.InternalCrop(startIndex, length);
             }
         }
-
-        private void InternalFormat(object[] args, IFormatProvider provider)
+                
+        private void InternalFormat(object[] args, IFormatProvider provider, int index, int length)
         {
             if (args.Length == 0)
             {
@@ -11007,17 +11122,24 @@ namespace BLK10.Text
                         
             var expression = new StringBuffer();
             var current    = '\0';
-            var state      = FormatState.OutsideExpression;
-            int index      = 0;
+            var state      = FormatState.OutsideExpression;            
+            int totLength  = index + length;
             int openCount  = 0;
             int closeCount = 0;
-
-            var chunk = this.m_ChunkHead;
+            
+            StringNode chunk;
             int local;
 
             do
             {
+                chunk = this.FindChunkForIndex(index);
                 local = index - chunk.m_Offset;
+                
+                if (local >= chunk.m_Length)
+                {
+                    break;
+                }
+
                 current = chunk.m_Chars[local];
 
                 switch (state)
@@ -11026,6 +11148,8 @@ namespace BLK10.Text
                         switch (current)
                         {
                             case '{':
+                                // remove open bracket
+                                totLength--;
                                 this.InternalShrink(index--, 1);
                                 openCount++;
                                 state = FormatState.OpenBracket;
@@ -11064,6 +11188,8 @@ namespace BLK10.Text
                                 state = FormatState.OpenBracket;
                                 break;
                             case '}':
+                                // remove close bracket
+                                totLength--;
                                 this.InternalShrink(index--, 1);
                                 closeCount++;
                                 state = FormatState.CloseBracket;
@@ -11110,13 +11236,16 @@ namespace BLK10.Text
 
                                     string value = Formatter.Eval(source, expression, provider);                                    
                                    
+                                    // this is not the usual way, could be removed.
                                     if (value.Length == 0)
                                     { // empty string was submitted or returned, normalize the space.
-                                        this.InternalShrink(index, 1);
+                                        totLength--;
+                                        this.InternalShrink(index, 1);                                        
                                     }
-                                    
-                                    this.InternalReplace(value, (index - (expression.Length + (closeCount >> 1))), expression.Length);
-                                    index += (value.Length - expression.Length);
+                                                                        
+                                    this.InternalReplace(value, (index - (expression.Length + (closeCount >> 1))), expression.Length);                                   
+                                    index     += (value.Length - expression.Length);
+                                    totLength += (value.Length - expression.Length);
                                     
                                     expression.InternalClear(DEFAULT_CAPACITY);
                                     openCount  = 0;
@@ -11131,14 +11260,9 @@ namespace BLK10.Text
                         throw new FormatException();
                 }
 
-                if (++local == chunk.m_Length)
-                {
-                    chunk = chunk.m_Next;
-                }
-
                 index++;
             }
-            while ((chunk != null));
+            while (index <= totLength);
         }
        
 
@@ -11862,9 +11986,14 @@ namespace BLK10.Text
         private void InternalAssign(int index, char value)
         {
             var chunk = this.FindChunkForIndex(index);
-            int localIndex = index - chunk.m_Offset;
+            int local = index - chunk.m_Offset;
 
-            chunk.m_Chars[localIndex] = value;            
+            if (local >= chunk.m_Length)
+            {
+                throw new ArgumentOutOfRangeException("localIndex");
+            }
+
+            chunk.m_Chars[local] = value;            
 
             this.m_CachedStr = null;
         }
@@ -11885,21 +12014,26 @@ namespace BLK10.Text
         private void InternalAssign(int index, char[] value, int startIndex, int length)
         {
             var chunk = this.FindChunkForIndex(index);
-            int localIndex = index - chunk.m_Offset;
+            int local = index - chunk.m_Offset;
+
+            if (local >= chunk.m_Length)
+            {
+                throw new ArgumentOutOfRangeException("localIndex");
+            }
 
             while ((length > 0) && (chunk != null))
             {
-                int len = Math.Min(chunk.m_Chars.Length - localIndex, length);
+                int len = Math.Min(chunk.m_Chars.Length - local, length);
 
-                Array.Copy(value, startIndex, chunk.m_Chars, localIndex, len);
+                Array.Copy(value, startIndex, chunk.m_Chars, local, len);
 
                 startIndex += len;
-                localIndex += len;
+                local += len;
                 length -= len;
 
-                if (localIndex >= chunk.m_Chars.Length)
+                if (local >= chunk.m_Chars.Length)
                 {
-                    localIndex = 0;
+                    local = 0;
                     chunk = chunk.m_Next;
                 }
             }
@@ -12230,7 +12364,8 @@ namespace BLK10.Text
             return (capacity);
         }
 
-        /// <summary>Find chunk from global index.</summary>
+        /// <summary>Find chunk from global index.
+        /// <para/>If out of range doesn't return null, instead it return the last chunk.</summary>
         private StringNode FindChunkForIndex(int index)
         {
             var chunk = this.m_ChunkHead;
@@ -12244,7 +12379,7 @@ namespace BLK10.Text
 
                 chunk = chunk.m_Next;
             }
-
+            
             return (this.m_ChunkTail);
         }
 
@@ -12281,7 +12416,7 @@ namespace BLK10.Text
             return (false);
         }
 
-        public static bool IsNullOrEmptyOrWhitespace(StringBuffer sb)
+        public static bool IsNullOrWhitespace(StringBuffer sb)
         {
             if (sb == null)
             {
@@ -12305,29 +12440,114 @@ namespace BLK10.Text
         }
 
 
-        public static int Compare(StringBuffer strA, StringBuffer strB)
+        public static int Compare(StringBuffer sbA, StringBuffer sbB)
         {
-            return (string.Compare(strA.ToString(), strB.ToString()));
+            return (CultureInfo.CurrentCulture.CompareInfo.Compare(sbA.ToString(), sbB.ToString(), CompareOptions.None));            
         }
 
-        public static int Compare(StringBuffer strA, StringBuffer strB, bool ignoreCase)
+        public static int Compare(StringBuffer sbA, string strB)
         {
-            return (string.Compare(strA.ToString(), strB.ToString(), ignoreCase));
+            return (CultureInfo.CurrentCulture.CompareInfo.Compare(sbA.ToString(), strB, CompareOptions.None));
         }
 
-        public static int Compare(StringBuffer strA, StringBuffer strB, bool ignoreCase, CultureInfo culture)
+
+        public static int Compare(StringBuffer sbA, StringBuffer sbB, bool ignoreCase)
         {
-            return (string.Compare(strA.ToString(), strB.ToString(), ignoreCase, culture));
+            if (ignoreCase)
+            {
+                return (CultureInfo.CurrentCulture.CompareInfo.Compare(sbA.ToString(), sbB.ToString(), CompareOptions.IgnoreCase));
+            }
+
+            return (CultureInfo.CurrentCulture.CompareInfo.Compare(sbA.ToString(), sbB.ToString(), CompareOptions.None));            
         }
 
-        public static int Compare(StringBuffer strA, StringBuffer strB, StringComparison comparisonType)
+        public static int Compare(StringBuffer sbA, string strB, bool ignoreCase)
         {
-            return (string.Compare(strA.ToString(), strB.ToString(), comparisonType));
+            if (ignoreCase)
+            {
+                return (CultureInfo.CurrentCulture.CompareInfo.Compare(sbA.ToString(), strB, CompareOptions.IgnoreCase));
+            }
+
+            return (CultureInfo.CurrentCulture.CompareInfo.Compare(sbA.ToString(), strB, CompareOptions.None));
         }
 
-        public static bool Equals(StringBuffer strA, StringBuffer strB, StringComparison comparisonType)
+
+        public static int Compare(StringBuffer sbA, StringBuffer sbB, bool ignoreCase, CultureInfo culture)
         {
-            return (string.Compare(strA.ToString(), strB.ToString(), comparisonType) == 0);
+            if (culture == null)
+            {
+                throw new ArgumentNullException("culture");
+            }
+
+            return (culture.CompareInfo.Compare(sbA.ToString(), sbB.ToString()));           
+        }
+
+        public static int Compare(StringBuffer sbA, string strB, bool ignoreCase, CultureInfo culture)
+        {
+            if (culture == null)
+            {
+                throw new ArgumentNullException("culture");
+            }
+
+            return (culture.CompareInfo.Compare(sbA.ToString(), strB));
+        }
+
+
+        public static int Compare(StringBuffer sbA, StringBuffer sbB, StringComparison comparisonType)
+        {
+            return (string.Compare(sbA.ToString(), sbB.ToString(), comparisonType));
+        }
+
+        public static int Compare(StringBuffer sbA, string strB, StringComparison comparisonType)
+        {
+            return (string.Compare(sbA.ToString(), strB, comparisonType));
+        }
+
+
+        public static bool Equals(StringBuffer sbA, StringBuffer sbB)
+        {
+            if ((Object)sbA == (Object)sbB)
+            {
+                return (true);
+            }
+
+            if (((Object)sbA == null) || ((Object)sbB == null))
+            {
+                return (false);
+            }
+
+            if (sbA.Length != sbB.Length)
+            {
+                return (false);
+            }
+
+            return (string.Equals(sbA.ToString(), sbB.ToString()));            
+        }
+
+        public static bool Equals(StringBuffer sbA, string strB)
+        {            
+            if (((Object)sbA == null) || ((Object)strB == null))
+            {
+                return (false);
+            }
+
+            if (sbA.Length != strB.Length)
+            {
+                return (false);
+            }
+
+            return (string.Equals(sbA.ToString(), strB));
+        }
+
+
+        public static bool Equals(StringBuffer sbA, StringBuffer sbB, StringComparison comparisonType)
+        {
+            return (StringBuffer.Compare(sbA, sbB, comparisonType) == 0);
+        }
+
+        public static bool Equals(StringBuffer sbA, string strB, StringComparison comparisonType)
+        {
+            return (StringBuffer.Compare(sbA, strB, comparisonType) == 0);
         }
 
 
@@ -12349,8 +12569,8 @@ namespace BLK10.Text
                 throw new ArgumentNullException();
             }
             
-            var sb = buffer.Copy();            
-            sb.FormatWith(provider, args);
+            var sb = buffer.Copy();
+            sb.FormatWith(0, sb.Length, provider, args);
 
             return (sb);
         }

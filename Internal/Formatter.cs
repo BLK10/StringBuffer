@@ -81,7 +81,7 @@ namespace BLK10.Text
 
             if (current != null)
             { // Index based
-                if (expression.StartsWithAny(StringBuffer.Whitespaces, true, false) || expression.EndsWithAny(StringBuffer.Whitespaces, true, false))
+                if (expression.StartsWithAny(StringBuffer.Whitespace, true, false) || expression.EndsWithAny(StringBuffer.Whitespace, true, false))
                 {
                     throw new FormatException("Input string was not in a correct format.");
                 }
@@ -101,9 +101,9 @@ namespace BLK10.Text
             { // Name based
                 current = source[source.Length - 1];
 
-                if (expression.ContainsAny(StringBuffer.Whitespaces, 0, expression.Length, false))
+                if (expression.ContainsAny(StringBuffer.Whitespace, 0, expression.Length, false))
                 {
-                    throw new FormatException("Input string was not in a correct format.");
+                    throw new FormatException("Input string was not in a correct format.");                   
                 }
 
                 var expre = expression.Copy()

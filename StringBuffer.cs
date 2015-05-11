@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 
-// TODO: Documentation, CTOR for Stream
+
 namespace BLK10.Text
 {    
     /// <summary>The type of search to perform.</summary>
@@ -548,59 +548,6 @@ namespace BLK10.Text
         }
 
 
-        /// <summary>Appends a specified string buffer to this instance.</summary>
-        public StringBuffer Append(StringBuffer value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            return (this.Append(value, 0, value.Length));
-        }
-
-        /// <summary>Appends a specified string buffer to this instance.</summary>
-        public StringBuffer Append(StringBuffer value, int startIndex)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-            
-            return (this.Append(value, startIndex, value.Length - startIndex));
-        }
-
-        /// <summary>Appends a specified string buffer to this instance.</summary>
-        public StringBuffer Append(StringBuffer value, int startIndex, int length)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-                        
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-
-            if ((startIndex < 0) || ((startIndex + length) > value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
-            }
-                        
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (length == 0)
-            {
-                return (this);
-            }
-
-            this.InternalAppend(value, startIndex, length);
-            return (this);
-        }
-
-
         /// <summary>Appends the default line terminator to this instance.</summary>
         public StringBuffer AppendLine()
         {            
@@ -715,61 +662,8 @@ namespace BLK10.Text
             this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
             return (this);
         }
-
-
-        /// <summary>Appends a specified string buffer followed by the default line terminator to this instance.</summary>
-        public StringBuffer AppendLine(StringBuffer value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            return (this.AppendLine(value, 0, value.Length));
-        }
-
-        /// <summary>Appends a specified string buffer followed by the default line terminator to this instance.</summary>
-        public StringBuffer AppendLine(StringBuffer value, int startIndex)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-            
-            return (this.AppendLine(value, startIndex, value.Length - startIndex));
-        }
-
-        /// <summary>Appends a specified string buffer followed by the default line terminator to this instance.</summary>
-        public StringBuffer AppendLine(StringBuffer value, int startIndex, int length)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-            
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-
-            if ((startIndex < 0) || ((startIndex + length) > value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
-            }
-                        
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (length != 0)
-            {
-                this.InternalAppend(value, startIndex, length);
-            }
-                        
-            this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            return (this);
-        }
-
-
+        
+        
         /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
         public StringBuffer AppendFormat(string value, params object[] args)
@@ -813,52 +707,7 @@ namespace BLK10.Text
 
             return (this);
         }
-        
-        /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer AppendFormat(StringBuffer value, params object[] args)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            int index = this.Length;            
-            this.InternalAppend(value, 0, value.Length);
-            this.InternalFormat(args, null, index, value.Length);
-
-            return (this);
-        }
-
-        /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer AppendFormat(StringBuffer value, IFormatProvider provider, params object[] args)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-            int index = this.Length;            
-            this.InternalAppend(value, 0, value.Length);
-            this.InternalFormat(args, provider, index, value.Length);
-
-            return (this);
-        }
-
+                
 
         /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
@@ -908,54 +757,6 @@ namespace BLK10.Text
             return (this);
         }
 
-        /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer AppendLineFormat(StringBuffer value, params object[] args)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-            int index = this.Length;
-            this.InternalAppend(value, 0, value.Length);
-            this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            this.InternalFormat(args, null, index, value.Length);
-
-            return (this);
-        }
-
-        /// <summary>Appends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer AppendLineFormat(StringBuffer value, IFormatProvider provider, params object[] args)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-            int index = this.Length;
-            this.InternalAppend(value, 0, value.Length);
-            this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            this.InternalFormat(args, provider, index, value.Length);
-
-            return (this);
-        }
-        
         #endregion
 
 
@@ -1133,72 +934,6 @@ namespace BLK10.Text
         }
 
 
-        /// <summary>Prepends a specified string buffer to this instance.</summary>
-        public StringBuffer Prepend(StringBuffer value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            return (this.Prepend(value, 0, value.Length));
-        }
-
-        /// <summary>Prepends a specified string buffer to this instance.</summary>
-        public StringBuffer Prepend(StringBuffer value, int startIndex)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if ((startIndex < 0) || (startIndex >= value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
-            }
-
-            return (this.Prepend(value, startIndex, value.Length - startIndex));
-        }
-
-        /// <summary>Prepends a specified string buffer to this instance.</summary>
-        public StringBuffer Prepend(StringBuffer value, int startIndex, int length)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-            
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-
-            if ((startIndex < 0) || ((startIndex + length) > value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (length == 0)
-            {
-                return (this);
-            }
-
-            if (this.Length == 0)
-            {
-                this.InternalAppend(value, startIndex, length);
-            }
-            else
-            {
-                this.InternalExpand(0, length);
-                this.InternalAssign(0, value, startIndex, length);
-            }
-            return (this);
-        }
-
-
         /// <summary>Prepends the default line terminator to this instance.</summary>
         public StringBuffer PrependLine()
         {            
@@ -1236,11 +971,6 @@ namespace BLK10.Text
             if (value == null)
             {
                 throw new ArgumentNullException("value");
-            }
-
-            if ((startIndex < 0) || (startIndex >= value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
             }
 
             return (this.PrependLine(value, startIndex, value.Length - startIndex));
@@ -1309,11 +1039,6 @@ namespace BLK10.Text
                 throw new ArgumentNullException("value");
             }
 
-            if ((startIndex < 0) || ((startIndex + (value.Length - startIndex)) > value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
-            }
-
             return (this.PrependLine(value, startIndex, value.Length - startIndex));
         }
 
@@ -1358,82 +1083,7 @@ namespace BLK10.Text
 
             return (this);
         }
-
-
-        /// <summary>Prepends a specified string buffer followed by the default line terminator to this instance.</summary>
-        public StringBuffer PrependLine(StringBuffer value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            return (this.PrependLine(value, 0, value.Length));
-        }
-
-        /// <summary>Prepends a specified string buffer followed by the default line terminator to this instance.</summary>
-        public StringBuffer PrependLine(StringBuffer value, int startIndex)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if ((startIndex < 0) || (startIndex >= value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
-            }
-
-            return (this.PrependLine(value, startIndex, value.Length - startIndex));
-        }
-
-        /// <summary>Prepends a specified string buffer followed by the default line terminator to this instance.</summary>
-        public StringBuffer PrependLine(StringBuffer value, int startIndex, int length)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-
-            if ((startIndex < 0) || ((startIndex + length) > value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (length == 0)
-            {
-                return (this);
-            }
-
-            if (this.Length == 0)
-            {
-                if (length != 0)
-                {
-                    this.InternalAppend(value, startIndex, length);
-                }
-                this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-            else
-            {
-                this.InternalExpand(0, length + Environment.NewLine.Length);
-                if (length != 0)
-                {
-                    this.InternalAssign(0, value, startIndex, length);
-                }
-                this.InternalAssign(length, Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-
-            return (this);
-        }
-
+        
 
         /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
@@ -1483,70 +1133,6 @@ namespace BLK10.Text
 
             this.CheckEnumeration();
             this.m_Failed = false;            
-            
-            if (this.Length == 0)
-            {
-                this.InternalAppend(value, 0, value.Length);
-            }
-            else
-            {
-                this.InternalExpand(0, value.Length);
-                this.InternalAssign(0, value, 0, value.Length);
-            }
-
-            this.InternalFormat(args, provider, 0, value.Length);
-
-            return (this);
-        }
-
-        /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer PrependFormat(StringBuffer value, params object[] args)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-           
-            if (this.Length == 0)
-            {
-                this.InternalAppend(value, 0, value.Length);
-            }
-            else
-            {
-                this.InternalExpand(0, value.Length);
-                this.InternalAssign(0, value, 0, value.Length);
-            }
-
-            this.InternalFormat(args, null, 0, value.Length);
-
-            return (this);
-        }
-
-        /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer PrependFormat(StringBuffer value, IFormatProvider provider, params object[] args)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
             
             if (this.Length == 0)
             {
@@ -1632,74 +1218,6 @@ namespace BLK10.Text
             return (this);
         }
 
-        /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer PrependLineFormat(StringBuffer value, params object[] args)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (this.Length == 0)
-            {
-                this.InternalAppend(value, 0, value.Length);
-                this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-            else
-            {
-                this.InternalExpand(0, value.Length + Environment.NewLine.Length);
-                this.InternalAssign(0, value, 0, value.Length);
-                this.InternalAssign(value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-
-            this.InternalFormat(args, null, 0, value.Length);
-
-            return (this);
-        }
-
-        /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer PrependLineFormat(StringBuffer value, IFormatProvider provider, params object[] args)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (this.Length == 0)
-            {
-                this.InternalAppend(value, 0, value.Length);
-                this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-            else
-            {
-                this.InternalExpand(0, value.Length + Environment.NewLine.Length);
-                this.InternalAssign(0, value, 0, value.Length);
-                this.InternalAssign(value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-
-            this.InternalFormat(args, provider, 0, value.Length);
-
-            return (this);
-        }
-        
         #endregion
 
 
@@ -1891,74 +1409,7 @@ namespace BLK10.Text
             return (this);
         }
 
-
-        /// <summary>Inserts a specified string buffer into this instance at the specified character position.</summary>
-        public StringBuffer Insert(int index, StringBuffer value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            return (this.Insert(index, value, 0, value.Length));
-        }
-
-        /// <summary>Inserts a specified string buffer into this instance at the specified character position.</summary>
-        public StringBuffer Insert(int index, StringBuffer value, int startIndex)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            return (this.Insert(index, value, startIndex, value.Length - startIndex));
-        }
-
-        /// <summary>Inserts a specified string buffer into this instance at the specified character position.</summary>
-        public StringBuffer Insert(int index, StringBuffer value, int startIndex, int length)
-        {
-            if ((index < 0) || (index > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-            
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-
-            if ((startIndex < 0) || ((startIndex + length) > value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (length == 0)
-            {
-                return (this);
-            }
-                        
-            if (index == this.Length)
-            {
-                this.InternalAppend(value, startIndex, length);
-            }
-            else
-            {
-                this.InternalExpand(index, length);
-                this.InternalAssign(index, value, startIndex, length);
-            }
-
-            return (this);
-        }
-
-
+        
         /// <summary>Inserts the default line terminator into this instance at the specified character position.</summary>
         public StringBuffer InsertLine(int index)
         {
@@ -2124,76 +1575,6 @@ namespace BLK10.Text
         }
 
 
-        /// <summary>Inserts a specified string buffer followed by the default line terminator into this instance at the specified character position.</summary>
-        public StringBuffer InsertLine(int index, StringBuffer value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            return (this.InsertLine(index, value, 0, value.Length));
-        }
-
-        /// <summary>Inserts a specified string buffer followed by the default line terminator into this instance at the specified character position.</summary>
-        public StringBuffer InsertLine(int index, StringBuffer value, int startIndex)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            return (this.InsertLine(index, value, startIndex, value.Length - startIndex));
-        }
-
-        /// <summary>Inserts a specified string buffer followed by the default line terminator into this instance at the specified character position.</summary>
-        public StringBuffer InsertLine(int index, StringBuffer value, int startIndex, int length)
-        {
-            if ((index < 0) || (index > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-
-            if ((startIndex < 0) || ((startIndex + length) > value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-                        
-            if (index == this.Length)
-            {
-                if (length != 0)
-                {
-                    this.InternalAppend(value, startIndex, length);
-                }
-                this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-            else
-            {                
-                this.InternalExpand(index, length + Environment.NewLine.Length);
-                if (length != 0)
-                {
-                    this.InternalAssign(index, value, startIndex, length);
-                }
-                this.InternalAssign(index + length, Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-
-            return (this);
-        }
-
-
         /// <summary>Inserts the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
         public StringBuffer InsertFormat(int index, string value, params object[] args)
@@ -2267,81 +1648,7 @@ namespace BLK10.Text
 
             return (this);
         }
-
-        /// <summary>Inserts the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer InsertFormat(int index, StringBuffer value, params object[] args)
-        {
-            if ((index < 0) || (index > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (index == this.Length)
-            {
-                this.InternalAppend(value, 0, value.Length);
-            }
-            else
-            {
-                this.InternalExpand(index, value.Length);
-                this.InternalAssign(index, value, 0, value.Length);
-            }
-
-            this.InternalFormat(args, null, index, value.Length);
-
-            return (this);
-        }
-
-        /// <summary>Inserts the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer InsertFormat(int index, StringBuffer value, IFormatProvider provider, params object[] args)
-        {
-            if ((index < 0) || (index > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (index == this.Length)
-            {
-                this.InternalAppend(value, 0, value.Length);
-            }
-            else
-            {
-                this.InternalExpand(index, value.Length);
-                this.InternalAssign(index, value, 0, value.Length);
-            }
-
-            this.InternalFormat(args, provider, index, value.Length);
-
-            return (this);
-        }
-
+                
 
         /// <summary>Inserts the string returned by processing a composite format string, which contains zero or more format items, to this instance.
         /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
@@ -2420,85 +1727,7 @@ namespace BLK10.Text
 
             return (this);
         }
-
-        /// <summary>Prepends the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array.</summary>
-        public StringBuffer InsertLineFormat(int index, StringBuffer value, params object[] args)
-        {
-            if ((index < 0) || (index > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (index == this.Length)
-            {
-                this.InternalAppend(value, 0, value.Length);
-                this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-            else
-            {
-                this.InternalExpand(index, value.Length + Environment.NewLine.Length);
-                this.InternalAssign(index, value, 0, value.Length);
-                this.InternalAssign(index + value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-
-            this.InternalFormat(args, null, index, value.Length);
-
-            return (this);
-        }
-
-        /// <summary>Inserts the string returned by processing a composite format string, which contains zero or more format items, to this instance.
-        /// Each format item is replaced by the string representation of a corresponding argument in a parameter array using a specified format provider.</summary>
-        public StringBuffer InsertLineFormat(int index, StringBuffer value, IFormatProvider provider, params object[] args)
-        {
-            if ((index < 0) || (index > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (args == null)
-            {
-                throw new ArgumentNullException("args");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (index == this.Length)
-            {
-                this.InternalAppend(value, 0, value.Length);
-                this.InternalAppend(Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-            else
-            {
-                this.InternalExpand(index, value.Length + Environment.NewLine.Length);
-                this.InternalAssign(index, value, 0, value.Length);
-                this.InternalAssign(index + value.Length, Environment.NewLine, 0, Environment.NewLine.Length);
-            }
-
-            this.InternalFormat(args, provider, index, value.Length);
-
-            return (this);
-        }
-                
+        
         #endregion
         
         
@@ -2607,32 +1836,7 @@ namespace BLK10.Text
 
             return (this);
         }
-
-        /// <summary>Substitutes all occurrences of a specified character with another specified string buffer in this instance.</summary>
-        public StringBuffer Substitute(char oldValue, StringBuffer newValue)
-        {
-            return (this.Substitute(oldValue, newValue, false));
-        }
-
-        /// <summary>Substitutes all occurrences of a specified character with another specified string buffer in this instance.</summary>
-        public StringBuffer Substitute(char oldValue, StringBuffer newValue, bool ignoreCase)
-        {
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (this.Length != 0)
-            {
-                this.InternalFindMultipleAndReplace(oldValue, newValue, 0, this.Length, ignoreCase);
-            }
-
-            return (this);
-        }
-
+                
 
         /// <summary>Substitutes all occurrences of a specified string with another specified character in this instance.</summary>
         public StringBuffer Substitute(string oldValue, char newValue)
@@ -2692,131 +1896,7 @@ namespace BLK10.Text
 
             return (this);
         }
-
-        /// <summary>Substitutes all occurrences of a specified string with another specified string buffer in this instance.</summary>
-        public StringBuffer Substitute(string oldValue, StringBuffer newValue)
-        {
-            return (this.Substitute(oldValue, newValue, false));
-        }
-
-        /// <summary>Substitutes all occurrences of a specified string with another specified string buffer in this instance.</summary>
-        public StringBuffer Substitute(string oldValue, StringBuffer newValue, bool ignoreCase)
-        {
-            if (string.IsNullOrEmpty(oldValue))
-            {
-                throw new ArgumentNullException("oldValue");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (oldValue.Length > this.Length)
-            {
-                return (this);
-            }
-
-            this.InternalFindMultipleAndReplace(oldValue, newValue, 0, this.Length, ignoreCase);
-
-            return (this);
-        }
-
-
-        /// <summary>Substitutes all occurrences of a specified string buffer with another specified character in this instance.</summary>
-        public StringBuffer Substitute(StringBuffer oldValue, char newValue)
-        {
-            return (this.Substitute(oldValue, newValue, false));
-        }
-
-        /// <summary>Substitutes all occurrences of a specified string buffer with another specified character in this instance.</summary>
-        public StringBuffer Substitute(StringBuffer oldValue, char newValue, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(oldValue))
-            {
-                throw new ArgumentNullException("oldValue");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (oldValue.Length > this.Length)
-            {
-                return (this);
-            }
-
-            this.InternalFindMultipleAndReplace(oldValue, newValue, 0, this.Length, ignoreCase);
-
-            return (this);
-        }
-
-        /// <summary>Substitutes all occurrences of a specified string buffer with another specified string in this instance.</summary>
-        public StringBuffer Substitute(StringBuffer oldValue, string newValue)
-        {
-            return (this.Substitute(oldValue, newValue, false));
-        }
-
-        /// <summary>Substitutes all occurrences of a specified string buffer with another specified string in this instance.</summary>
-        public StringBuffer Substitute(StringBuffer oldValue, string newValue, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(oldValue))
-            {
-                throw new ArgumentNullException("oldValue");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (oldValue.Length > this.Length)
-            {
-                return (this);
-            }
-
-            this.InternalFindMultipleAndReplace(oldValue, newValue, 0, this.Length, ignoreCase);
-
-            return (this);
-        }
-
-        /// <summary>Substitutes all occurrences of a specified string buffer with another specified string buffer in this instance.</summary>
-        public StringBuffer Substitute(StringBuffer oldValue, StringBuffer newValue)
-        {
-            return (this.Substitute(oldValue, newValue, false));
-        }
-
-        /// <summary>Substitutes all occurrences of a specified string buffer with another specified string buffer in this instance.</summary>
-        public StringBuffer Substitute(StringBuffer oldValue, StringBuffer newValue, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(oldValue))
-            {
-                throw new ArgumentNullException("oldValue");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (oldValue.Length > this.Length)
-            {
-                return (this);
-            }
-
-            this.InternalFindMultipleAndReplace(oldValue, newValue, 0, this.Length, ignoreCase);
-
-            return (this);
-        }
-        
+                
         #endregion
                 
         
@@ -2962,79 +2042,6 @@ namespace BLK10.Text
             return (this);
         }
         
-
-        /// <summary>Replaces the first or the last specified character by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(char oldValue, ESearch occurrence, StringBuffer newValue)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, 0, this.Length, false));
-        }
-
-        /// <summary>Replaces the first or the last specified character by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(char oldValue, ESearch occurrence, StringBuffer newValue, int index)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, index, this.Length - index, false));
-        }
-
-        /// <summary>Replaces the first or the last specified character by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(char oldValue, ESearch occurrence, StringBuffer newValue, int index, int length)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, index, length, false));
-        }
-
-        /// <summary>Replaces the first or the last specified character by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(char oldValue, ESearch occurrence, StringBuffer newValue, int index, int length, bool ignoreCase)
-        {
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if ((length < 0) || ((index + length) > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-                        
-            this.CheckEnumeration();
-            
-            if (length == 0)
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;            
-            int pos;
-
-            if (occurrence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(oldValue, index, length, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(oldValue, index, length, ignoreCase);
-            }
-                        
-            if (pos != -1)
-            {
-                this.InternalReplace(newValue, pos, 1);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
 
         /// <summary>Replaces the first or the last specified string by another specified character in this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
@@ -3187,323 +2194,16 @@ namespace BLK10.Text
         }
         
 
-        /// <summary>Replaces the first or the last specified string by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(string oldValue, ESearch occurrence, StringBuffer newValue)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, 0, this.Length, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(string oldValue, ESearch occurrence, StringBuffer newValue, int index)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, index, this.Length - index, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(string oldValue, ESearch occurrence, StringBuffer newValue, int index, int length)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, index, length, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(string oldValue, ESearch occurrence, StringBuffer newValue, int index, int length, bool ignoreCase)
-        {
-            if (string.IsNullOrEmpty(oldValue))
-            {
-                throw new ArgumentNullException("oldValue");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if ((length < 0) || ((index + length) > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-                        
-            this.CheckEnumeration();            
-
-            if ((length == 0) || (oldValue.Length > length))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurrence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(oldValue, index, length, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(oldValue, index, length, ignoreCase);
-            }
-                        
-            if (pos != -1)
-            {
-                this.InternalReplace(newValue, pos, oldValue.Length);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified character in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, char newValue)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, 0, this.Length, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified character in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, char newValue, int index)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, index, this.Length - index, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified character in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, char newValue, int index, int length)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, index, length, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified character in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, char newValue, int index, int length, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(oldValue))
-            {
-                throw new ArgumentNullException("oldValue");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if ((length < 0) || ((index + length) > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-
-            this.CheckEnumeration();            
-
-            if ((length == 0) || (oldValue.Length > length))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurrence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(oldValue, index, length, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(oldValue, index, length, ignoreCase);
-            }
-                        
-            if (pos != -1)
-            {
-                this.InternalReplace(newValue, pos, oldValue.Length);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-        
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified string in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, string newValue)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, 0, this.Length, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified string in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, string newValue, int index)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, index, this.Length - index, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified string in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, string newValue, int index, int length)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, index, length, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified string in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, string newValue, int index, int length, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(oldValue))
-            {
-                throw new ArgumentNullException("oldValue");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if ((length < 0) || ((index + length) > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-                        
-            this.CheckEnumeration();            
-
-            if ((length == 0) || (oldValue.Length > length))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurrence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(oldValue, index, length, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(oldValue, index, length, ignoreCase);
-            }
-                        
-            if (pos != -1)
-            {
-                this.InternalReplace(newValue, pos, oldValue.Length);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-        
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, StringBuffer newValue)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, 0, this.Length, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, StringBuffer newValue, int index)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, index, this.Length - index, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, StringBuffer newValue, int index, int length)
-        {
-            return (this.Replace(oldValue, occurrence, newValue, index, length, false));
-        }
-
-        /// <summary>Replaces the first or the last specified string buffer by another specified string buffer in this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer Replace(StringBuffer oldValue, ESearch occurrence, StringBuffer newValue, int index, int length, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(oldValue))
-            {
-                throw new ArgumentNullException("oldValue");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if ((length < 0) || ((index + length) > this.Length))
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-                        
-            this.CheckEnumeration();            
-
-            if ((length == 0) || (oldValue.Length > length))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurrence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(oldValue, index, length, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(oldValue, index, length, ignoreCase);
-            }
-                        
-            if (pos != -1)
-            {
-                this.InternalReplace(newValue, pos, oldValue.Length);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-        
-
         /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching character position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, char value, ESearch occurenceType, char newValue)
+        public StringBuffer ReplaceRange(int index, char value, ESearch occurence, char newValue)
         {
-            return (this.ReplaceRange(index, value, occurenceType, newValue, false));
+            return (this.ReplaceRange(index, value, occurence, newValue, false));
         }
 
         /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching character position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, char value, ESearch occurenceType, char newValue, bool ignoreCase)
+        public StringBuffer ReplaceRange(int index, char value, ESearch occurence, char newValue, bool ignoreCase)
         {
             if ((index < 0) || (index >= this.Length))
             {
@@ -3515,7 +2215,7 @@ namespace BLK10.Text
             this.m_Failed = false;
             int pos;
 
-            if (occurenceType == ESearch.FirstOccurrence)
+            if (occurence == ESearch.FirstOccurrence)
             {
                 pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
             }
@@ -3539,14 +2239,14 @@ namespace BLK10.Text
 
         /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching character position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, char value, ESearch occurenceType, string newValue)
+        public StringBuffer ReplaceRange(int index, char value, ESearch occurence, string newValue)
         {
-            return (this.ReplaceRange(index, value, occurenceType, newValue, false));
+            return (this.ReplaceRange(index, value, occurence, newValue, false));
         }
 
         /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching character position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, char value, ESearch occurenceType, string newValue, bool ignoreCase)
+        public StringBuffer ReplaceRange(int index, char value, ESearch occurence, string newValue, bool ignoreCase)
         {
             if ((index < 0) || (index >= this.Length))
             {
@@ -3563,7 +2263,7 @@ namespace BLK10.Text
             this.m_Failed = false;
             int pos;
 
-            if (occurenceType == ESearch.FirstOccurrence)
+            if (occurence == ESearch.FirstOccurrence)
             {
                 pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
             }
@@ -3583,66 +2283,18 @@ namespace BLK10.Text
 
             return (this);
         }
-
-
-        /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching character position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, char value, ESearch occurenceType, StringBuffer newValue)
-        {
-            return (this.ReplaceRange(index, value, occurenceType, newValue, false));
-        }
-
-        /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching character position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, char value, ESearch occurenceType, StringBuffer newValue, bool ignoreCase)
-        {
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            this.CheckEnumeration();
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurenceType == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-                        
-            if (pos != -1)
-            {
-                this.InternalReplace(newValue, index, (pos + 1) - index);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
+        
 
         /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, string value, ESearch occurenceType, char newValue)
+        public StringBuffer ReplaceRange(int index, string value, ESearch occurence, char newValue)
         {
-            return (this.ReplaceRange(index, value, occurenceType, newValue, false));
+            return (this.ReplaceRange(index, value, occurence, newValue, false));
         }
 
         /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, string value, ESearch occurenceType, char newValue, bool ignoreCase)
+        public StringBuffer ReplaceRange(int index, string value, ESearch occurence, char newValue, bool ignoreCase)
         {
             if ((index < 0) || (index >= this.Length))
             {
@@ -3659,7 +2311,7 @@ namespace BLK10.Text
             this.m_Failed = false;
             int pos;
 
-            if (occurenceType == ESearch.FirstOccurrence)
+            if (occurence == ESearch.FirstOccurrence)
             {
                 pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
             }
@@ -3683,14 +2335,14 @@ namespace BLK10.Text
 
         /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, string value, ESearch occurenceType, string newValue)
+        public StringBuffer ReplaceRange(int index, string value, ESearch occurence, string newValue)
         {
-            return (this.ReplaceRange(index, value, occurenceType, newValue, false));
+            return (this.ReplaceRange(index, value, occurence, newValue, false));
         }
 
         /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, string value, ESearch occurenceType, string newValue, bool ignoreCase)
+        public StringBuffer ReplaceRange(int index, string value, ESearch occurence, string newValue, bool ignoreCase)
         {
             if ((index < 0) || (index >= this.Length))
             {
@@ -3712,7 +2364,7 @@ namespace BLK10.Text
             this.m_Failed = false;
             int pos;
 
-            if (occurenceType == ESearch.FirstOccurrence)
+            if (occurence == ESearch.FirstOccurrence)
             {
                 pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
             }
@@ -3723,213 +2375,6 @@ namespace BLK10.Text
                         
             if (pos != -1)
             {                
-                this.InternalReplace(newValue, index, (pos + value.Length) - index);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
-        /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, string value, ESearch occurenceType, StringBuffer newValue)
-        {
-            return (this.ReplaceRange(index, value, occurenceType, newValue, false));
-        }
-
-        /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, string value, ESearch occurenceType, StringBuffer newValue, bool ignoreCase)
-        {
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            this.CheckEnumeration();
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurenceType == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-                        
-            if (pos != -1)
-            {
-                this.InternalReplace(newValue, index, (pos + value.Length) - index);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
-        /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string buffer position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, StringBuffer value, ESearch occurenceType, char newValue)
-        {
-            return (this.ReplaceRange(index, value, occurenceType, newValue, false));
-        }
-
-        /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string buffer position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, StringBuffer value, ESearch occurenceType, char newValue, bool ignoreCase)
-        {
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            this.CheckEnumeration();
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurenceType == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-                        
-            if (pos != -1)
-            {                
-                this.InternalReplace(newValue, index, (pos + value.Length) - index);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
-        /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string buffer position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, StringBuffer value, ESearch occurenceType, string newValue)
-        {
-            return (this.ReplaceRange(index, value, occurenceType, newValue, false));
-        }
-
-        /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string buffer position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, StringBuffer value, ESearch occurenceType, string newValue, bool ignoreCase)
-        {
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            this.CheckEnumeration();
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurenceType == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-                        
-            if (pos != -1)
-            {
-                this.InternalReplace(newValue, index, (pos + value.Length) - index);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
-        /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string buffer position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, StringBuffer value, ESearch occurenceType, StringBuffer newValue)
-        {
-            return (this.ReplaceRange(index, value, occurenceType, newValue, false));
-        }
-
-        /// <summary>Replaces a range of characters from the specified index position to the first or last specified matching string buffer position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer ReplaceRange(int index, StringBuffer value, ESearch occurenceType, StringBuffer newValue, bool ignoreCase)
-        {
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            this.CheckEnumeration();
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurenceType == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-                        
-            if (pos != -1)
-            {
                 this.InternalReplace(newValue, index, (pos + value.Length) - index);
             }
             else
@@ -4045,61 +2490,6 @@ namespace BLK10.Text
             return (this);
         }
         
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified character.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(char value, ESearch occurence, StringBuffer newValue)
-        {
-            return (this.ReplaceBefore(value, occurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified character. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(char value, ESearch occurence, StringBuffer newValue, int index)
-        {
-            return (this.ReplaceBefore(value, occurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified character. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(char value, ESearch occurence, StringBuffer newValue, int index, bool ignoreCase)
-        {
-            if (newValue == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if (pos > 0)
-            {
-                this.InternalReplace(newValue, 0, pos);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
 
         /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
@@ -4222,265 +2612,6 @@ namespace BLK10.Text
         }
         
 
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(string value, ESearch occurence, StringBuffer newValue)
-        {
-            return (this.ReplaceBefore(value, occurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(string value, ESearch occurence, StringBuffer newValue, int index)
-        {
-            return (this.ReplaceBefore(value, occurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(string value, ESearch occurence, StringBuffer newValue, int index, bool ignoreCase)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();            
-
-            if (value.Length > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if (pos > 0)
-            {
-                this.InternalReplace(newValue, 0, pos);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string buffer.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(StringBuffer value, ESearch occurence, char newValue)
-        {
-            return (this.ReplaceBefore(value, occurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(StringBuffer value, ESearch occurence, char newValue, int index)
-        {
-            return (this.ReplaceBefore(value, occurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(StringBuffer value, ESearch occurence, char newValue, int index, bool ignoreCase)
-        {            
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if (value.Length > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if (pos > 0)
-            {
-                this.InternalReplace(newValue, 0, pos);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-        
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string buffer.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(StringBuffer value, ESearch occurence, string newValue)
-        {
-            return (this.ReplaceBefore(value, occurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(StringBuffer value, ESearch occurence, string newValue, int index)
-        {
-            return (this.ReplaceBefore(value, occurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(StringBuffer value, ESearch occurence, string newValue, int index, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if (value.Length > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if (pos > 0)
-            {                
-                this.InternalReplace(newValue, 0, pos);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-        
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string buffer.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(StringBuffer value, ESearch occurence, StringBuffer newValue)
-        {
-            return (this.ReplaceBefore(value, occurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(StringBuffer value, ESearch occurence, StringBuffer newValue, int index)
-        {
-            return (this.ReplaceBefore(value, occurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Before the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceBefore(StringBuffer value, ESearch occurence, StringBuffer newValue, int index, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if (value.Length > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if (pos > 0)
-            {
-                this.InternalReplace(newValue, 0, pos);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
         /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified character.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
         public StringBuffer ReplaceAfter(char value, ESearch occurence, char newValue)
@@ -4585,61 +2716,6 @@ namespace BLK10.Text
             return (this);
         }
         
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified character.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(char value, ESearch occurence, StringBuffer newValue)
-        {
-            return (this.ReplaceAfter(value, occurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified character. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(char value, ESearch occurence, StringBuffer newValue, int index)
-        {
-            return (this.ReplaceAfter(value, occurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified character. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(char value, ESearch occurence, StringBuffer newValue, int index, bool ignoreCase)
-        {
-            if (newValue == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos != -1) && ((pos + 1) != this.Length))
-            {
-                this.InternalReplace(newValue, pos + 1, this.Length - (pos + 1));
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
 
         /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
@@ -4766,266 +2842,7 @@ namespace BLK10.Text
 
             return (this);
         }
-        
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(string value, ESearch occurence, StringBuffer newValue)
-        {
-            return (this.ReplaceAfter(value, occurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(string value, ESearch occurence, StringBuffer newValue, int index)
-        {
-            return (this.ReplaceAfter(value, occurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(string value, ESearch occurence, StringBuffer newValue, int index, bool ignoreCase)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if (value.Length > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos != -1) && ((pos + value.Length) != this.Length))
-            {
-                this.InternalReplace(newValue, pos + value.Length, this.Length - (pos + value.Length));
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string buffer.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(StringBuffer value, ESearch occurence, char newValue)
-        {
-            return (this.ReplaceAfter(value, occurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(StringBuffer value, ESearch occurence, char newValue, int index)
-        {
-            return (this.ReplaceAfter(value, occurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(StringBuffer value, ESearch occurence, char newValue, int index, bool ignoreCase)
-        {            
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if (value.Length > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos != -1) && ((pos + value.Length) != this.Length))
-            {
-                this.InternalReplace(newValue, pos + value.Length, this.Length - (pos + value.Length));
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-        
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string buffer.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(StringBuffer value, ESearch occurence, string newValue)
-        {
-            return (this.ReplaceAfter(value, occurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(StringBuffer value, ESearch occurence, string newValue, int index)
-        {
-            return (this.ReplaceAfter(value, occurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(StringBuffer value, ESearch occurence, string newValue, int index, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if (value.Length > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos != -1) && ((pos + value.Length) != this.Length))
-            {
-                this.InternalReplace(newValue, pos + value.Length, this.Length - (pos + value.Length));
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-        
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string buffer.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(StringBuffer value, ESearch occurence, StringBuffer newValue)
-        {
-            return (this.ReplaceAfter(value, occurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(StringBuffer value, ESearch occurence, StringBuffer newValue, int index)
-        {
-            return (this.ReplaceAfter(value, occurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. After the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceAfter(StringBuffer value, ESearch occurence, StringBuffer newValue, int index, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException();
-            }
-            
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if (value.Length > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos != -1) && ((pos + value.Length) != this.Length))
-            {
-                this.InternalReplace(newValue, pos + value.Length, this.Length - (pos + value.Length));
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
+                
 
         /// <summary>Replaces a substring in this instance. Between the first and the second occurence of the specified characters.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
@@ -5165,79 +2982,7 @@ namespace BLK10.Text
             return (this);
         }
         
-
-        /// <summary>Replaces a substring in this instance. Between the first and the second occurence of the specified characters.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(char prev, ESearch prevOccurence, char next, ESearch nextOccurence, StringBuffer newValue)
-        {
-            return (this.ReplaceInside(prev, prevOccurence, next, nextOccurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring in this instance. Between the first and the second occurence of the specified characters. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(char prev, ESearch prevOccurence, char next, ESearch nextOccurence, StringBuffer newValue, int index)
-        {
-            return (this.ReplaceInside(prev, prevOccurence, next, nextOccurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring in this instance. Between the first and the second occurence of the specified characters. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(char prev, ESearch prevOccurence, char next, ESearch nextOccurence, StringBuffer newValue, int index, bool ignoreCase)
-        {
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            this.m_Failed = false;
-            int pos1;
-            int pos2;
-
-            if (prevOccurence == ESearch.FirstOccurrence)
-            {
-                pos1 = this.InternalFirstIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos1 = this.InternalLastIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos1 != -1) && ((pos1 + 1) < this.Length))
-            {
-                if (nextOccurence == ESearch.FirstOccurrence)
-                {
-                    pos2 = this.InternalFirstIndexOf(next, pos1 + 1, this.Length - (pos1 + 1), ignoreCase);
-                }
-                else
-                {
-                    pos2 = this.InternalLastIndexOf(next, pos1 + 1, this.Length - (pos1 + 1), ignoreCase);
-                }
-
-                if ((pos2 != -1) && ((pos1 + 1) <= pos2))
-                {
-                    this.InternalReplace(newValue, pos1 + 1, pos2 - (pos1 + 1));
-                }
-                else
-                {
-                    this.m_Failed = true;
-                }
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
+        
         /// <summary>Replaces a substring in this instance. Between the first and the second occurence of the specified strings.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
         public StringBuffer ReplaceInside(string prev, ESearch prevOccurence, string next, ESearch nextOccurence, char newValue)
@@ -5407,354 +3152,7 @@ namespace BLK10.Text
 
             return (this);
         }
-        
-
-        /// <summary>Replaces a substring in this instance. Between the first and the second occurence of the specified strings.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(string prev, ESearch prevOccurence, string next, ESearch nextOccurence, StringBuffer newValue)
-        {
-            return (this.ReplaceInside(prev, prevOccurence, next, nextOccurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring in this instance. Between the first and the second occurence of the specified strings. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(string prev, ESearch prevOccurence, string next, ESearch nextOccurence, StringBuffer newValue, int index)
-        {
-            return (this.ReplaceInside(prev, prevOccurence, next, nextOccurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring in this instance. Between the first and the second occurence of the specified strings. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(string prev, ESearch prevOccurence, string next, ESearch nextOccurence, StringBuffer newValue, int index, bool ignoreCase)
-        {
-            if (string.IsNullOrEmpty(prev))
-            {
-                throw new ArgumentNullException("prev");
-            }
-
-            if (string.IsNullOrEmpty(next))
-            {
-                throw new ArgumentNullException("next");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-            
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if ((prev.Length + next.Length) > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos1;
-            int pos2;
-
-            if (prevOccurence == ESearch.FirstOccurrence)
-            {
-                pos1 = this.InternalFirstIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos1 = this.InternalLastIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos1 != -1) && ((pos1 + prev.Length) < this.Length))
-            {
-                if (nextOccurence == ESearch.FirstOccurrence)
-                {
-                    pos2 = this.InternalFirstIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-                else
-                {
-                    pos2 = this.InternalLastIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-
-                if ((pos2 != -1) && ((pos1 + prev.Length) <= pos2))
-                {
-                    this.InternalReplace(newValue, pos1 + prev.Length, pos2 - (pos1 + prev.Length));
-                }
-                else
-                {
-                    this.m_Failed = true;
-                }
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
-        /// <summary>Replaces a substring from this instance. Between the first and the second occurence of the specified string buffers.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, char newValue)
-        {
-            return (this.ReplaceInside(prev, prevOccurence, next, nextOccurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Between the first and the second occurence of the specified string buffers. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, char newValue, int index)
-        {
-            return (this.ReplaceInside(prev, prevOccurence, next, nextOccurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Between the first and the second occurence of the specified string buffers. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, char newValue, int index, bool ignoreCase)
-        {            
-            if (StringBuffer.IsNullOrEmpty(prev))
-            {
-                throw new ArgumentNullException("prev");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(next))
-            {
-                throw new ArgumentNullException("next");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if ((prev.Length + next.Length) > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos1;
-            int pos2;
-
-            if (prevOccurence == ESearch.FirstOccurrence)
-            {
-                pos1 = this.InternalFirstIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos1 = this.InternalLastIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos1 != -1) && ((pos1 + prev.Length) < this.Length))
-            {
-                if (nextOccurence == ESearch.FirstOccurrence)
-                {
-                    pos2 = this.InternalFirstIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-                else
-                {
-                    pos2 = this.InternalLastIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-
-                if ((pos2 != -1) && ((pos1 + prev.Length) <= pos2))
-                {
-                    this.InternalReplace(newValue, pos1 + prev.Length, pos2 - (pos1 + prev.Length));
-                }
-                else
-                {
-                    this.m_Failed = true;
-                }
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-        
-
-        /// <summary>Replaces a substring from this instance. Between the first and the second occurence of the specified string buffers.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, string newValue)
-        {
-            return (this.ReplaceInside(prev, prevOccurence, next, nextOccurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Between the first and the second occurence of the specified string buffers. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, string newValue, int index)
-        {
-            return (this.ReplaceInside(prev, prevOccurence, next, nextOccurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Between the first and the second occurence of the specified string buffers. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, string newValue, int index, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(prev))
-            {
-                throw new ArgumentNullException("prev");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(next))
-            {
-                throw new ArgumentNullException("next");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if ((prev.Length + next.Length) > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos1;
-            int pos2;
-
-            if (prevOccurence == ESearch.FirstOccurrence)
-            {
-                pos1 = this.InternalFirstIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos1 = this.InternalLastIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos1 != -1) && ((pos1 + prev.Length) < this.Length))
-            {
-                if (nextOccurence == ESearch.FirstOccurrence)
-                {
-                    pos2 = this.InternalFirstIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-                else
-                {
-                    pos2 = this.InternalLastIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-
-                if ((pos2 != -1) && ((pos1 + prev.Length) <= pos2))
-                {                    
-                    this.InternalReplace(newValue, pos1 + prev.Length, pos2 - (pos1 + prev.Length));
-                }
-                else
-                {
-                    this.m_Failed = true;
-                }
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-        
-
-        /// <summary>Replaces a substring from this instance. Between the first and the second occurence of the specified string buffers.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, StringBuffer newValue)
-        {
-            return (this.ReplaceInside(prev, prevOccurence, next, nextOccurence, newValue, 0, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Between the first and the second occurence of the specified string buffers. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, StringBuffer newValue, int index)
-        {
-            return (this.ReplaceInside(prev, prevOccurence, next, nextOccurence, newValue, index, false));
-        }
-
-        /// <summary>Replaces a substring from this instance. Between the first and the second occurence of the specified string buffers. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer ReplaceInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, StringBuffer newValue, int index, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(prev))
-            {
-                throw new ArgumentNullException("prev");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(next))
-            {
-                throw new ArgumentNullException("next");
-            }
-
-            if (newValue == null)
-            {
-                throw new ArgumentNullException("newValue");
-            }
-            
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if ((prev.Length + next.Length) > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos1;
-            int pos2;
-
-            if (prevOccurence == ESearch.FirstOccurrence)
-            {
-                pos1 = this.InternalFirstIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos1 = this.InternalLastIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos1 != -1) && ((pos1 + prev.Length) < this.Length))
-            {
-                if (nextOccurence == ESearch.FirstOccurrence)
-                {
-                    pos2 = this.InternalFirstIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-                else
-                {
-                    pos2 = this.InternalLastIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-
-                if ((pos2 != -1) && ((pos1 + prev.Length) <= pos2))
-                {
-                    this.InternalReplace(newValue, pos1 + prev.Length, pos2 - (pos1 + prev.Length));
-                }
-                else
-                {
-                    this.m_Failed = true;
-                }
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-                
+               
         #endregion
 
         
@@ -5762,14 +3160,14 @@ namespace BLK10.Text
                 
         /// <summary>Retrieves a substring from this instance, from the specified index position to the first or last specified matching character position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringRange(int index, char value, ESearch occurenceType)
+        public StringBuffer SubstringRange(int index, char value, ESearch occurence)
         {
-            return (this.SubstringRange(index, value, occurenceType, false));
+            return (this.SubstringRange(index, value, occurence, false));
         }
 
         /// <summary>Retrieves a substring from this instance, from the specified index position to the first or last specified matching character position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer SubstringRange(int index, char value, ESearch occurenceType, bool ignoreCase)
+        public StringBuffer SubstringRange(int index, char value, ESearch occurence, bool ignoreCase)
         {
             if ((index < 0) || (index >= this.Length))
             {
@@ -5781,7 +3179,7 @@ namespace BLK10.Text
             this.m_Failed = false;
             int pos;
 
-            if (occurenceType == ESearch.FirstOccurrence)
+            if (occurence == ESearch.FirstOccurrence)
             {
                 pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
             }
@@ -5805,14 +3203,14 @@ namespace BLK10.Text
 
         /// <summary>Retrieves a substring from this instance, from the specified index position to the first or last specified matching string position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer SubstringRange(int index, string value, ESearch occurenceType)
+        public StringBuffer SubstringRange(int index, string value, ESearch occurence)
         {
-            return (this.SubstringRange(index, value, occurenceType, false));
+            return (this.SubstringRange(index, value, occurence, false));
         }
 
         /// <summary>Retrieves a substring from this instance, from the specified index position to the first or last specified matching string position (included) from this instance.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer SubstringRange(int index, string value, ESearch occurenceType, bool ignoreCase)
+        public StringBuffer SubstringRange(int index, string value, ESearch occurence, bool ignoreCase)
         {
             if ((index < 0) || (index >= this.Length))
             {
@@ -5824,7 +3222,7 @@ namespace BLK10.Text
             this.m_Failed = false;
             int pos;
 
-            if (occurenceType == ESearch.FirstOccurrence)
+            if (occurence == ESearch.FirstOccurrence)
             {
                 pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
             }
@@ -5844,50 +3242,7 @@ namespace BLK10.Text
 
             return (this);
         }
-
-
-        /// <summary>Retrieves a substring from this instance, from the specified index position to the first or last specified matching string buffer position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer SubstringRange(int index, StringBuffer value, ESearch occurenceType)
-        {
-            return (this.SubstringRange(index, value, occurenceType, false));
-        }
-
-        /// <summary>Retrieves a substring from this instance, from the specified index position to the first or last specified matching string buffer position (included) from this instance.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>         
-        public StringBuffer SubstringRange(int index, StringBuffer value, ESearch occurenceType, bool ignoreCase)
-        {
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurenceType == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if (pos != -1)
-            {
-                this.InternalCrop(index, (pos + value.Length) - index);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
+        
 
         /// <summary>Retrieves a substring from this instance. Before the first or the last occurence of the specified character.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
@@ -6006,72 +3361,7 @@ namespace BLK10.Text
 
             return (this);
         }
-
-
-        /// <summary>Retrieves a substring from this instance. Before the first or the last occurence of the specified string buffer.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringBefore(StringBuffer value, ESearch occurence)
-        {
-            return (this.SubstringBefore(value, occurence, 0, false));
-        }
-
-        /// <summary>Retrieves a substring from this instance. Before the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringBefore(StringBuffer value, ESearch occurence, int index)
-        {
-            return (this.SubstringBefore(value, occurence, index, false));
-        }
-
-        /// <summary>Retrieves a substring from this instance. Before the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringBefore(StringBuffer value, ESearch occurence, int index, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if (value.Length > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if (pos == 0)
-            {
-                this.InternalClear();
-            }
-            else if (pos != -1)
-            {
-                this.InternalCrop(0, pos);
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
+        
 
         /// <summary>Retrieves a substring from this instance. After the first or the last occurence of the specified character.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
@@ -6191,72 +3481,7 @@ namespace BLK10.Text
             return (this);
         }
 
-
-        /// <summary>Retrieves a substring from this instance. After the first or the last occurence of the specified string buffer.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringAfter(StringBuffer value, ESearch occurence)
-        {
-            return (this.SubstringAfter(value, occurence, 0, false));
-        }
-
-        /// <summary>Retrieves a substring from this instance. After the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringAfter(StringBuffer value, ESearch occurence, int index)
-        {
-            return (this.SubstringAfter(value, occurence, index, false));
-        }
-
-        /// <summary>Retrieves a substring from this instance. After the first or the last occurence of the specified string buffer. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringAfter(StringBuffer value, ESearch occurence, int index, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if (value.Length > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos;
-
-            if (occurence == ESearch.FirstOccurrence)
-            {
-                pos = this.InternalFirstIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos = this.InternalLastIndexOf(value, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos + value.Length) == this.Length)
-            {
-                this.InternalClear();
-            }
-            else if (pos != -1)
-            {
-                this.InternalCrop(pos + value.Length, this.Length - (pos + value.Length));
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
-
+        
         /// <summary>Retrieves a substring from this instance. Between the first and the second occurences of the specified characters.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
         public StringBuffer SubstringInside(char prev, ESearch prevOccurence, char next, ESearch nextOccurence)
@@ -6405,90 +3630,7 @@ namespace BLK10.Text
 
             return (this);
         }
-
-
-        /// <summary>Retrieves a substring from this instance. Between the first and the second occurences of the specified string buffers.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence)
-        {
-            return (this.SubstringInside(prev, prevOccurence, next, nextOccurence, 0, false));
-        }
-
-        /// <summary>Retrieves a substring from this instance. Between the first and the second occurences of the specified string buffers. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, int index)
-        {
-            return (this.SubstringInside(prev, prevOccurence, next, nextOccurence, index, false));
-        }
-
-        /// <summary>Retrieves a substring from this instance. Between the first and the second occurences of the specified string buffers. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringInside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, int index, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(prev))
-            {
-                throw new ArgumentNullException("prev");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(next))
-            {
-                throw new ArgumentNullException("next");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if ((prev.Length + next.Length) > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos1;
-            int pos2;
-
-            if (prevOccurence == ESearch.FirstOccurrence)
-            {
-                pos1 = this.InternalFirstIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos1 = this.InternalLastIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos1 != -1) && ((pos1 + prev.Length) < this.Length))
-            {
-                if (nextOccurence == ESearch.FirstOccurrence)
-                {
-                    pos2 = this.InternalFirstIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-                else
-                {
-                    pos2 = this.InternalLastIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-
-                if ((pos2 != -1) && ((pos1 + prev.Length) <= pos2))
-                {
-                    this.InternalCrop(pos1 + prev.Length, pos2 - (pos1 + prev.Length));
-                }
-                else
-                {
-                    this.m_Failed = true;
-                }
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
-
+        
 
         /// <summary>Retrieves a substring from this instance. Before the first and after the second occurences of the specified characters.
         /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
@@ -6638,89 +3780,6 @@ namespace BLK10.Text
 
             return (this);
         }
-
-
-        /// <summary>Retrieves a substring from this instance. Before the first and after the second occurences of the specified string buffers.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringOutside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence)
-        {
-            return (this.SubstringOutside(prev, prevOccurence, next, nextOccurence, 0, false));
-        }
-
-        /// <summary>Retrieves a substring from this instance. Before the first and after the second occurences of the specified string buffers. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringOutside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, int index)
-        {
-            return (this.SubstringOutside(prev, prevOccurence, next, nextOccurence, index, false));
-        }
-
-        /// <summary>Retrieves a substring from this instance. Before the first and after the second occurences of the specified string buffers. Perform searching from the specified index.
-        /// <para/>This operation may fail, check it with the Fail/Succeed methods.</summary>
-        public StringBuffer SubstringOutside(StringBuffer prev, ESearch prevOccurence, StringBuffer next, ESearch nextOccurence, int index, bool ignoreCase)
-        {
-            if (StringBuffer.IsNullOrEmpty(prev))
-            {
-                throw new ArgumentNullException("prev");
-            }
-
-            if (StringBuffer.IsNullOrEmpty(next))
-            {
-                throw new ArgumentNullException("next");
-            }
-
-            if ((index < 0) || (index >= this.Length))
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-
-            this.CheckEnumeration();
-
-            if ((prev.Length + next.Length) > (this.Length - index))
-            {
-                this.m_Failed = true;
-                return (this);
-            }
-
-            this.m_Failed = false;
-            int pos1;
-            int pos2;
-
-            if (prevOccurence == ESearch.FirstOccurrence)
-            {
-                pos1 = this.InternalFirstIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-            else
-            {
-                pos1 = this.InternalLastIndexOf(prev, index, this.Length - index, ignoreCase);
-            }
-
-            if ((pos1 != -1) && ((pos1 + prev.Length) < this.Length))
-            {
-                if (nextOccurence == ESearch.FirstOccurrence)
-                {
-                    pos2 = this.InternalFirstIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-                else
-                {
-                    pos2 = this.InternalLastIndexOf(next, pos1 + prev.Length, this.Length - (pos1 + prev.Length), ignoreCase);
-                }
-
-                if ((pos2 != -1) && ((pos1 + prev.Length) <= pos2))
-                {                    
-                    this.InternalShrink(pos1 + prev.Length, pos2 - (pos1 + prev.Length));
-                }
-                else
-                {
-                    this.m_Failed = true;
-                }
-            }
-            else
-            {
-                this.m_Failed = true;
-            }
-
-            return (this);
-        }
         
         #endregion
                         
@@ -6739,6 +3798,7 @@ namespace BLK10.Text
             return (this.Trim(new char[1] { value }, ignoreCase));
         }
         
+
         /// <summary>Removes all leading and trailing occurrences of a set of characters specified in an array from this instance.</summary>
         public StringBuffer Trim(params char[] value)
         {            
@@ -6779,6 +3839,7 @@ namespace BLK10.Text
             return (this.TrimStart(new char[1] { value }, ignoreCase));
         }
 
+
         /// <summary>Removes all leading occurrences of a set of characters specified in an array from this instance.</summary>
         public StringBuffer TrimStart(params char[] value)
         {
@@ -6818,6 +3879,7 @@ namespace BLK10.Text
         {
             return (this.TrimEnd(new char[1] { value }, ignoreCase));
         }
+
 
         /// <summary>Removes all trailing occurrences of a set of characters specified in an array from this instance.</summary>
         public StringBuffer TrimEnd(params char[] value)
@@ -6983,7 +4045,7 @@ namespace BLK10.Text
         #endregion
         
 
-        #region "FROMCHAR | FROMCHARARRAY | FROMSTRING | FROMSTRINGBUFFER"
+        #region "FROMCHAR | FROMCHARARRAY | FROMSTRING"
 
         /// <summary>Clears this instance and append a character.</summary>
         public StringBuffer FromChar(char value)
@@ -7116,65 +4178,7 @@ namespace BLK10.Text
             this.InternalAppend(value, startIndex, length);
             return (this);
         }
-
-
-        /// <summary>Clears this instance and append a copy of the string buffer.</summary>
-        public StringBuffer FromStringBuffer(StringBuffer value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            return (this.FromStringBuffer(value, 0, value.Length));
-        }
-
-        /// <summary>Clears this instance and append a copy of the string buffer.</summary>
-        public StringBuffer FromStringBuffer(StringBuffer value, int startIndex)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            return (this.FromStringBuffer(value, startIndex, value.Length - startIndex));
-        }
-
-        /// <summary>Clears this instance and append a copy of the string buffer.</summary>
-        public StringBuffer FromStringBuffer(StringBuffer value, int startIndex, int length)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
-
-            if ((startIndex < 0) || ((startIndex + length) > value.Length))
-            {
-                throw new ArgumentOutOfRangeException("startIndex");
-            }
-
-            this.CheckEnumeration();
-            this.m_Failed = false;
-
-            if (this.Length != 0)
-            {
-                this.InternalClear(length);
-            }
-
-            if (length == 0)
-            {
-                return (this);
-            }
-
-            this.InternalAppend(value, startIndex, length);
-            return (this);
-        }
-
+        
         #endregion
 
 
@@ -7192,15 +4196,15 @@ namespace BLK10.Text
         /// <para/>based on index position equivalent to the string format or based on name.        
         /// </summary>
         public StringBuffer FormatWith(int index, int length, IFormatProvider provider, params object[] args)
-        {            
-            if (length < 0)
+        {
+            if ((index < 0) || (index >= this.Length))
             {
-                throw new ArgumentOutOfRangeException("length");
+                throw new ArgumentOutOfRangeException("index");
             }
 
-            if ((index < 0) || ((index + length) > this.Length))
+            if ((length < 0) || ((index + length) > this.Length))
             {
-                throw new ArgumentOutOfRangeException("startIndex");
+                throw new ArgumentOutOfRangeException("length");
             }
 
             if (args == null)
@@ -10580,7 +7584,7 @@ namespace BLK10.Text
         /// <summary>String buffer deep copy.</summary>
         public StringBuffer Copy(int index, int length)
         {
-            if ((index < 0) || (index > this.Length))
+            if (index < 0)
             {
                 throw new ArgumentOutOfRangeException("index");
             }
@@ -11328,24 +8332,7 @@ namespace BLK10.Text
                 length--;
             }
         }
-
-        private void InternalFindMultipleAndReplace(char oldValue, StringBuffer newValue, int index, int length, bool ignoreCase)
-        {
-            int endIndex = index + length - 1;
-
-            while ((length > 0) && (endIndex >= index))
-            {
-                if (this.InternalContains(oldValue, endIndex, ignoreCase))
-                {
-                    this.InternalReplace(newValue, endIndex, 1);
-                }
-
-                endIndex--;
-                length--;
-            }
-        }
-
-
+       
         private void InternalFindMultipleAndReplace(string oldValue, char newValue, int index, int length, bool ignoreCase)
         {
             int oldLength = oldValue.Length;
@@ -11389,97 +8376,8 @@ namespace BLK10.Text
                 }
             }
         }
-
-        private void InternalFindMultipleAndReplace(string oldValue, StringBuffer newValue, int index, int length, bool ignoreCase)
-        {
-            int oldLength = oldValue.Length;
-            int endIndex = index + length - oldLength;
-
-            while ((length > 0) && (endIndex >= index))
-            {
-                if (this.InternalContains(oldValue, endIndex, length, ignoreCase))
-                {
-                    this.InternalReplace(newValue, endIndex, oldLength);
-
-                    endIndex -= oldLength;
-                    length -= oldLength;
-                }
-                else
-                {
-                    endIndex--;
-                    length--;
-                }
-            }
-        }
-
-
-        private void InternalFindMultipleAndReplace(StringBuffer oldValue, char newValue, int index, int length, bool ignoreCase)
-        {
-            int oldLength = oldValue.Length;
-            int endIndex  = index + length - oldLength;
-
-            while ((length > 0) && (endIndex >= index))
-            {
-                if (this.InternalContains(oldValue, endIndex, length, ignoreCase))
-                {
-                    this.InternalReplace(newValue, endIndex, oldLength);
-
-                    endIndex -= oldLength;
-                    length -= oldLength;
-                }
-                else
-                {
-                    endIndex--;
-                    length--;
-                }
-            }
-        }
-
-        private void InternalFindMultipleAndReplace(StringBuffer oldValue, string newValue, int index, int length, bool ignoreCase)
-        {
-            int oldLength = oldValue.Length;
-            int endIndex  = index + length - oldLength;
-
-            while ((length > 0) && (endIndex >= index))
-            {
-                if (this.InternalContains(oldValue, endIndex, length, ignoreCase))
-                {
-                    this.InternalReplace(newValue, endIndex, oldLength);
-
-                    endIndex -= oldLength;
-                    length -= oldLength;
-                }
-                else
-                {
-                    endIndex--;
-                    length--;
-                }
-            }
-        }
         
-        private void InternalFindMultipleAndReplace(StringBuffer oldValue, StringBuffer newValue, int index, int length, bool ignoreCase)
-        {
-            int oldLength = oldValue.Length;
-            int endIndex  = index + length - oldLength;
-
-            while ((length > 0) && (endIndex >= index))
-            {
-                if (this.InternalContains(oldValue, endIndex, length, ignoreCase))
-                {
-                    this.InternalReplace(newValue, endIndex, oldLength);
-
-                    endIndex -= oldLength;
-                    length   -= oldLength;
-                }
-                else
-                {
-                    endIndex--;
-                    length--;
-                }
-            }
-        }
-
-
+       
         private void InternalReplace(char value, int index, int length)
         {
             if ((length - 1) > 0)
@@ -11510,28 +8408,7 @@ namespace BLK10.Text
                 this.InternalAssign(index, value, 0, value.Length);
             }
         }
-
-        private void InternalReplace(StringBuffer value, int index, int length)
-        {
-            if (value.Length == 0)
-            {
-                this.InternalShrink(index, length);
-            }
-            else
-            {
-                if ((length - value.Length) > 0)
-                { // oldLength is greater, shrink at index with diff length and assign
-                    this.InternalShrink(index + value.Length, length - value.Length);
-                }
-                else if ((length - value.Length) < 0)
-                { // newLength is greater, expand at index with diff length and assign
-                    this.InternalExpand(index + length, value.Length - length);
-                }
-
-                this.InternalAssign(index, value, 0, value.Length);
-            }
-        }
-        
+       
 
         private void InternalCrop(int index)
         {            
@@ -11876,12 +8753,6 @@ namespace BLK10.Text
         {
             this.InternalAppend(value, 0, length);
         }
-
-        /// <summary>Appends a string buffer. Invalidate the cached string.</summary>
-        private void InternalAppend(StringBuffer value, int startIndex, int length)
-        {
-            this.InternalAppend(value.ToCharArray(), startIndex, length);
-        }
         
         /// <summary>Appends a string. Invalidate the cached string.</summary>
         private void InternalAppend(string value, int startIndex, int length)
@@ -11916,7 +8787,7 @@ namespace BLK10.Text
                 {
                     Array.Resize(ref lastChunk.m_Chars, capacity);
                 }
-
+                                
                 Array.Copy(value, startIndex, lastChunk.m_Chars, lastChunk.m_Length, newLength);
 
                 lastChunk.m_Length += newLength;
@@ -11996,12 +8867,6 @@ namespace BLK10.Text
             chunk.m_Chars[local] = value;            
 
             this.m_CachedStr = null;
-        }
-
-        /// <summary>Assign a string buffer. Invalidate the cached string.</summary>
-        private void InternalAssign(int index, StringBuffer value, int startIndex, int length)
-        {
-            this.InternalAssign(index, value.ToCharArray(), startIndex, length);
         }
         
         /// <summary>Assign a string. Invalidate the cached string.</summary>

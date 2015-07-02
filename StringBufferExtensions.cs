@@ -4,8 +4,13 @@ namespace BLK10.Text.Extensions
 {
     public static class StringBufferExtensions
     {
+        public static bool IsEmptyOrWhitespace(this StringBuffer @this)
+        {
+            return (StringBuffer.IsNullOrWhitespace(@this));
+        }
+        
 
-        #region "APPEND | APPENDLINE | APPENDFORMAT | APPENDLINEFORMAT | APPENDTABBEDLINE | APPENDTABBEDLINEFORMAT"
+        #region "APPEND | APPENDLINE | APPENDFORMAT | APPENDLINEFORMAT | APPENDTABLINE | APPENDTABLINEFORMAT"
 
         /// <summary>Appends a specified string buffer to this instance.</summary>
         public static StringBuffer Append(this StringBuffer @this, StringBuffer value)
@@ -156,29 +161,29 @@ namespace BLK10.Text.Extensions
         
 
         /// <summary>.</summary>
-        public static StringBuffer AppendTabbedLine(this StringBuffer @this, int tabCount, char[] value)
+        public static StringBuffer AppendTabLine(this StringBuffer @this, int tabCount, char[] value)
         {
             if (@this == null)
             {
                 throw new ArgumentNullException("StringBuffer could be null.");
             }
 
-            return (@this.Append('\t', tabCount).AppendLine(value));
+            return (@this.Append(tabCount, '\t').AppendLine(value));
         }
         
         /// <summary>.</summary>
-        public static StringBuffer AppendTabbedLine(this StringBuffer @this, int tabCount, string value)
+        public static StringBuffer AppendTabLine(this StringBuffer @this, int tabCount, string value)
         {
             if (@this == null)
             {
                 throw new ArgumentNullException("StringBuffer could be null.");
             }
 
-            return (@this.Append('\t', tabCount).AppendLine(value));            
+            return (@this.Append(tabCount, '\t').AppendLine(value));            
         }
 
         /// <summary>.</summary>
-        public static StringBuffer AppendTabbedLine(this StringBuffer @this, int tabCount, StringBuffer value)
+        public static StringBuffer AppendTabLine(this StringBuffer @this, int tabCount, StringBuffer value)
         {
             if (@this == null)
             {
@@ -190,23 +195,23 @@ namespace BLK10.Text.Extensions
                 throw new ArgumentNullException("value");
             }
 
-            return (@this.Append('\t', tabCount).AppendLine(value.ToCharArray()));
+            return (@this.Append(tabCount, '\t').AppendLine(value.ToCharArray()));
         }
         
         
         /// <summary>.</summary>
-        public static StringBuffer AppendTabbedLineFormat(this StringBuffer @this, int tabCount, string value, params object[] args)
+        public static StringBuffer AppendTabLineFormat(this StringBuffer @this, int tabCount, string value, params object[] args)
         {
             if (@this == null)
             {
                 throw new ArgumentNullException("StringBuffer could be null.");
             }
 
-            return (@this.Append('\t', tabCount).AppendLineFormat(value, args));
+            return (@this.Append(tabCount, '\t').AppendLineFormat(value, args));
         }
 
         /// <summary>.</summary>
-        public static StringBuffer AppendTabbedLineFormat(this StringBuffer @this, int tabCount, StringBuffer value, params object[] args)
+        public static StringBuffer AppendTabLineFormat(this StringBuffer @this, int tabCount, StringBuffer value, params object[] args)
         {
             if (@this == null)
             {
@@ -218,13 +223,13 @@ namespace BLK10.Text.Extensions
                 throw new ArgumentNullException("value");
             }
 
-            return (@this.Append('\t', tabCount).AppendLineFormat(value.ToString(), args));
+            return (@this.Append(tabCount, '\t').AppendLineFormat(value.ToString(), args));
         }
 
         #endregion
 
 
-        #region "PREPEND | PREPENDLINE | PREPENDFORMAT | PREPENDLINEFORMAT | PREPENDTABBEDLINE | PREPENDTABBEDLINEFORMAT"
+        #region "PREPEND | PREPENDLINE | PREPENDFORMAT | PREPENDLINEFORMAT | PREPENDTABLINE | PREPENDTABLINEFORMAT"
 
         /// <summary>Prepends a specified string buffer to this instance.</summary>
         public static StringBuffer Prepend(this StringBuffer @this, StringBuffer value)
@@ -375,7 +380,7 @@ namespace BLK10.Text.Extensions
 
 
         /// <summary>.</summary>
-        public static StringBuffer PrependTabbedLine(this StringBuffer @this, int tabCount, char[] value)
+        public static StringBuffer PrependTabLine(this StringBuffer @this, int tabCount, char[] value)
         {
             if (@this == null)
             {
@@ -386,7 +391,7 @@ namespace BLK10.Text.Extensions
         }
 
         /// <summary>.</summary>
-        public static StringBuffer PrependTabbedLine(this StringBuffer @this, int tabCount, string value)
+        public static StringBuffer PrependTabLine(this StringBuffer @this, int tabCount, string value)
         {
             if (@this == null)
             {
@@ -397,7 +402,7 @@ namespace BLK10.Text.Extensions
         }
 
         /// <summary>.</summary>
-        public static StringBuffer PrependTabbedLine(this StringBuffer @this, int tabCount, StringBuffer value)
+        public static StringBuffer PrependTabLine(this StringBuffer @this, int tabCount, StringBuffer value)
         {
             if (@this == null)
             {
@@ -414,7 +419,7 @@ namespace BLK10.Text.Extensions
 
 
         /// <summary>.</summary>
-        public static StringBuffer PrependTabbedLineFormat(this StringBuffer @this, int tabCount, string value, params object[] args)
+        public static StringBuffer PrependTabLineFormat(this StringBuffer @this, int tabCount, string value, params object[] args)
         {
             if (@this == null)
             {
@@ -425,7 +430,7 @@ namespace BLK10.Text.Extensions
         }
 
         /// <summary>.</summary>
-        public static StringBuffer PrependTabbedLineFormat(this StringBuffer @this, int tabCount, StringBuffer value, params object[] args)
+        public static StringBuffer PrependTabLineFormat(this StringBuffer @this, int tabCount, StringBuffer value, params object[] args)
         {
             if (@this == null)
             {
@@ -443,7 +448,7 @@ namespace BLK10.Text.Extensions
         #endregion
 
 
-        #region "INSERT | INSERTLINE | INSERTFORMAT | INSERTLINEFORMAT | INSERTTABBEDLINE | INSERTTABBEDLINEFORMAT"
+        #region "INSERT | INSERTLINE | INSERTFORMAT | INSERTLINEFORMAT | INSERTTABLINE | INSERTTABLINEFORMAT"
 
         /// <summary>Inserts a specified string buffer into this instance at the specified character position.</summary>
         public static StringBuffer Insert(this StringBuffer @this, int index, StringBuffer value)
@@ -594,7 +599,7 @@ namespace BLK10.Text.Extensions
 
 
         /// <summary>.</summary>
-        public static StringBuffer InsertTabbedLine(this StringBuffer @this, int index, int tabCount, char[] value)
+        public static StringBuffer InsertTabLine(this StringBuffer @this, int index, int tabCount, char[] value)
         {
             if (@this == null)
             {
@@ -605,7 +610,7 @@ namespace BLK10.Text.Extensions
         }
 
         /// <summary>.</summary>
-        public static StringBuffer InsertTabbedLine(this StringBuffer @this, int index, int tabCount, string value)
+        public static StringBuffer InsertTabLine(this StringBuffer @this, int index, int tabCount, string value)
         {
             if (@this == null)
             {
@@ -616,7 +621,7 @@ namespace BLK10.Text.Extensions
         }
 
         /// <summary>.</summary>
-        public static StringBuffer InsertTabbedLine(this StringBuffer @this, int index, int tabCount, StringBuffer value)
+        public static StringBuffer InsertTabLine(this StringBuffer @this, int index, int tabCount, StringBuffer value)
         {
             if (@this == null)
             {
@@ -633,7 +638,7 @@ namespace BLK10.Text.Extensions
 
 
         /// <summary>.</summary>
-        public static StringBuffer InsertTabbedLineFormat(this StringBuffer @this, int index, int tabCount, string value, params object[] args)
+        public static StringBuffer InsertTabLineFormat(this StringBuffer @this, int index, int tabCount, string value, params object[] args)
         {
             if (@this == null)
             {
@@ -644,7 +649,7 @@ namespace BLK10.Text.Extensions
         }
 
         /// <summary>.</summary>
-        public static StringBuffer InsertTabbedLineFormat(this StringBuffer @this, int index, int tabCount, StringBuffer value, params object[] args)
+        public static StringBuffer InsertTabLineFormat(this StringBuffer @this, int index, int tabCount, StringBuffer value, params object[] args)
         {
             if (@this == null)
             {

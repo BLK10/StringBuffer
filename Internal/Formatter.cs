@@ -19,7 +19,7 @@ namespace BLK10.Text
             object       objName  = null;
 
             foreach (var arg in args)
-            {
+            {                
                 if (arg != null)
                 {
                     if (Formatter.IsAnonymousType(arg.GetType()))
@@ -81,7 +81,7 @@ namespace BLK10.Text
 
             if (current != null)
             { // Index based
-                if (expression.StartsWithAny(StringBuffer.Whitespace, true, false) || expression.EndsWithAny(StringBuffer.Whitespace, true, false))
+                if (expression.StartsWithAny(StringBuffer.GetWhitespaces(), true, false) || expression.EndsWithAny(StringBuffer.GetWhitespaces(), true, false))
                 {
                     throw new FormatException("Input string was not in a correct format.");
                 }
@@ -101,7 +101,7 @@ namespace BLK10.Text
             { // Name based
                 current = source[source.Length - 1];
 
-                if (expression.ContainsAny(StringBuffer.Whitespace, 0, expression.Length, false))
+                if (expression.ContainsAny(StringBuffer.GetWhitespaces(), 0, expression.Length, false))
                 {
                     throw new FormatException("Input string was not in a correct format.");                   
                 }
@@ -115,10 +115,11 @@ namespace BLK10.Text
                                                    x.Crop(0, i);
                                                });
 
-                StringBuffer prop;
+                //StringBuffer prop;
 
                 do
                 {
+                    /*
                     prop = expre.Copy()
                                 .SubstringRange(0, '.', ESearch.FirstOccurrence)
                                 .Fail(x => expre.Clear())
@@ -126,6 +127,14 @@ namespace BLK10.Text
                                 .DoWhenElse(x => x.Contains('['),
                                             x => { current = Formatter.GetIndexedPropertyValue(current, x.ToString()); },
                                             x => { current = Formatter.GetPropertyValue(current, x.ToString()); });
+                    */
+                    expre.Copy()
+                         .SubstringRange(0, '.', ESearch.FirstOccurrence)
+                         .Fail(x => expre.Clear())
+                         .Succeed(x => expre.SubstringAfter('.', ESearch.FirstOccurrence))
+                         .DoWhenElse(x => x.Contains('['),
+                                     x => { current = Formatter.GetIndexedPropertyValue(current, x.ToString()); },
+                                     x => { current = Formatter.GetPropertyValue(current, x.ToString()); });
                 }
                 while ((expre.Length > 0) && (current != null));
 
